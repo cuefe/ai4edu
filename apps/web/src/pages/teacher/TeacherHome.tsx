@@ -2,17 +2,23 @@ import { BookOutlined, EditOutlined, FileTextOutlined } from "@ant-design/icons"
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Drawer, Empty, Row, Statistic, Table, Tag, Typography } from "antd";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { api, unwrap, type Schemas } from "@/api/client";
 import { useAuth } from "@/auth/AuthProvider";
 import { PageHead } from "@/components/PageHead";
 
 type ClassOut = Schemas["ClassOut"];
 
+const TOOLS = [
+  { icon: <EditOutlined />, title: "AI 备课", desc: "填课题，几分钟生成可编辑的教案，导出 Word", to: "/teacher/lesson-plans/new" },
+];
+
 const COMING = [
-  { icon: <EditOutlined />, title: "AI 备课", desc: "上传资料，生成教案、讲义和背诵要点", stage: "M1" },
   { icon: <BookOutlined />, title: "题库与出题", desc: "按知识点出题，自动校验答案后入库", stage: "M1" },
   { icon: <FileTextOutlined />, title: "作业与批改", desc: "布置作业、自动批改、查看作业报告", stage: "M2" },
 ];
+
+const ICON_STYLE = { fontSize: 22, color: "#2f6fed" };
 
 function Roster({ klass, onClose }: { klass: ClassOut | null; onClose: () => void }) {
   const classId = klass?.id ?? "";
@@ -41,6 +47,7 @@ function Roster({ klass, onClose }: { klass: ClassOut | null; onClose: () => voi
 
 export function TeacherHome() {
   const { me } = useAuth();
+  const navigate = useNavigate();
   const [viewing, setViewing] = useState<ClassOut | null>(null);
   const classes = useQuery({
     queryKey: ["teacher", "classes"],
@@ -61,13 +68,23 @@ export function TeacherHome() {
           </Col>
         ))}
       </Row>
+      <Typography.Title level={5}>教学工具</Typography.Title>
+      <Row gutter={[16, 16]} style={{ marginBottom: 32 }}>
+        {TOOLS.map((t) => (
+          <Col key={t.title} xs={24} sm={12} lg={8}>
+            <Card hoverable onClick={() => navigate(t.to)}>
+              <Card.Meta avatar={<span style={ICON_STYLE}>{t.icon}</span>} title={t.title} description={t.desc} />
+            </Card>
+          </Col>
+        ))}
+      </Row>
       <Typography.Title level={5}>即将上线</Typography.Title>
       <Row gutter={[16, 16]}>
         {COMING.map((c) => (
           <Col key={c.title} xs={24} sm={12} lg={8}>
             <Card>
               <Card.Meta
-                avatar={<span style={{ fontSize: 22, color: "#2f6fed" }}>{c.icon}</span>}
+                avatar={<span style={ICON_STYLE}>{c.icon}</span>}
                 title={
                   <>
                     {c.title} <Tag>{c.stage}</Tag>

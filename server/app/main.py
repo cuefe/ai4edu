@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import Settings, get_settings
 from app.core.errors import AppError, app_error_handler
+from app.modules.content.router import router as content_router
 from app.modules.iam.router import auth_router, me_router
 from app.modules.ops.router import router as ops_router
 from app.modules.org.router import org_router, student_router, teacher_router
@@ -52,7 +53,15 @@ def create_app() -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    for router in (auth_router, me_router, org_router, teacher_router, student_router, ops_router):
+    for router in (
+        auth_router,
+        me_router,
+        org_router,
+        teacher_router,
+        student_router,
+        content_router,
+        ops_router,
+    ):
         api.include_router(router)
     app.include_router(api)
     return app

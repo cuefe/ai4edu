@@ -60,7 +60,7 @@ export function AppLayout() {
       label: "教学",
       children: [
         { key: "/teacher", icon: <HomeOutlined />, label: "我的班级" },
-        { key: "soon-prepare", icon: <EditOutlined />, label: <>AI 备课{SOON}</>, disabled: true },
+        { key: "/teacher/lesson-plans", icon: <EditOutlined />, label: "AI 备课" },
         { key: "soon-qbank", icon: <BookOutlined />, label: <>题库{SOON}</>, disabled: true },
         { key: "soon-homework", icon: <FileTextOutlined />, label: <>作业{SOON}</>, disabled: true },
       ],
@@ -83,10 +83,16 @@ export function AppLayout() {
   // 断点未测出前 md 为 undefined，按桌面处理，避免闪一下手机布局
   const isMobile = screens.md === false;
 
+  // 子页面（如 /teacher/lesson-plans/新建）高亮所属菜单：取路径前缀最长的那一项
+  const menuKeys = items.flatMap((g) => (g && "children" in g && g.children ? g.children : [])).map((i) => String(i?.key));
+  const selectedKey = menuKeys
+    .filter((k) => location.pathname === k || location.pathname.startsWith(`${k}/`))
+    .sort((a, b) => b.length - a.length)[0];
+
   const menu = (
     <Menu
       mode="inline"
-      selectedKeys={[location.pathname]}
+      selectedKeys={selectedKey ? [selectedKey] : []}
       items={items}
       onClick={({ key }) => {
         navigate(key);

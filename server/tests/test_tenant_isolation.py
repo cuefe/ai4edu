@@ -83,6 +83,7 @@ def test_app_role_is_not_superuser(owner_conn):
         "audit_log",
         "campus",
         "class_member",
+        "document",
         "klass",
         "user_account",
     ]

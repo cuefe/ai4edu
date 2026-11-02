@@ -1,4 +1,5 @@
-import { Button, Result } from "antd";
+import { Button, Result, Spin } from "antd";
+import { lazy, Suspense, type ReactNode } from "react";
 import { createBrowserRouter, Outlet, useNavigate } from "react-router";
 import { AuthProvider } from "./auth/AuthProvider";
 import { HomeRedirect, RequireAuth, RequireRole } from "./auth/guards";
@@ -10,7 +11,20 @@ import { ClassesPage } from "./pages/org/ClassesPage";
 import { StudentsPage } from "./pages/org/StudentsPage";
 import { TeachersPage } from "./pages/org/TeachersPage";
 import { StudentHome } from "./pages/student/StudentHome";
+import { LessonPlansPage } from "./pages/teacher/LessonPlansPage";
 import { TeacherHome } from "./pages/teacher/TeacherHome";
+
+// 编辑器、公式、Markdown 渲染体积较大，只在打开这些页面时加载
+const LessonPlanNewPage = lazy(() =>
+  import("./pages/teacher/LessonPlanNewPage").then((m) => ({ default: m.LessonPlanNewPage })),
+);
+const LessonPlanEditPage = lazy(() =>
+  import("./pages/teacher/LessonPlanEditPage").then((m) => ({ default: m.LessonPlanEditPage })),
+);
+
+function Lazy({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<Spin style={{ display: "block", marginTop: 96 }} />}>{children}</Suspense>;
+}
 
 function Root() {
   return (
@@ -64,7 +78,26 @@ export const router = createBrowserRouter([
           {
             path: "teacher",
             element: <RequireRole roles={["teacher"]} />,
-            children: [{ index: true, element: <TeacherHome /> }],
+            children: [
+              { index: true, element: <TeacherHome /> },
+              { path: "lesson-plans", element: <LessonPlansPage /> },
+              {
+                path: "lesson-plans/new",
+                element: (
+                  <Lazy>
+                    <LessonPlanNewPage />
+                  </Lazy>
+                ),
+              },
+              {
+                path: "lesson-plans/:id",
+                element: (
+                  <Lazy>
+                    <LessonPlanEditPage />
+                  </Lazy>
+                ),
+              },
+            ],
           },
           {
             path: "student",

@@ -1,0 +1,12 @@
+# 教案生成评测用例。课题按人教版初中教材挑选，覆盖不同年级、课型；教研同事可以继续补充。
+# 字段和 LessonPlanIn 一致，没写的用默认值（人教版、新授课、45 分钟）。
+- {subject: 数学, grade: 七年级上册, topic: 1.2.1 有理数的概念}
+- {subject: 数学, grade: 七年级上册, topic: 3.1 列代数式表示数量关系, requirements: 学生基础较弱，多安排小组合作}
+- {subject: 数学, grade: 七年级下册, topic: 平行线的判定, lesson_type: 新授课, duration: 40}
+- {subject: 数学, grade: 八年级上册, topic: 全等三角形的判定（SAS）}
+- {subject: 数学, grade: 八年级下册, topic: 勾股定理, lesson_type: 复习课}
+- {subject: 数学, grade: 九年级上册, topic: 一元二次方程的解法（配方法）, lesson_type: 习题课}
+- {subject: 英语, grade: 七年级上册, topic: "Unit 1 You and Me, Section A (1a-1d)"}
+- {subject: 英语, grade: 七年级上册, topic: "Unit 3 My School, Section B Reading"}
+- {subject: 英语, grade: 八年级上册, topic: 一般过去时, lesson_type: 复习课}
+- {subject: 英语, grade: 九年级上册, topic: 中考书面表达：介绍一位你敬佩的人, lesson_type: 讲评课}

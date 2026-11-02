@@ -9,12 +9,17 @@ dependencies = [
     "cryptography>=50.0.2",
     "fastapi>=0.162.0",
     "httpx>=0.28.1",
+    "latex2mathml>=3.81.1",
+    "markdown-it-py>=4.2.0",
+    "mathml2omml>=0.0.2",
+    "mdit-py-plugins>=0.6.1",
     "openai>=3.42.1",
     "openpyxl>=3.1.5",
     "psycopg[binary]>=3.3.6",
     "pwdlib[argon2]>=0.3.1",
     "pydantic-settings>=2.16.2",
     "pyjwt>=2.15.1",
+    "python-docx>=1.2.0",
     "python-multipart>=0.0.33",
     "pyyaml>=6.0.3",
     "redis>=6.4.0",
@@ -45,3 +50,6 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/ai/skills/*/prompt.py" = ["E501"]  # prompt 是成段的中文，按行宽折开反而难读

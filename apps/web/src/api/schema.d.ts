@@ -366,6 +366,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/teacher/lesson-plans/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 生成教案
+         * @description 以 Server-Sent Events 流式返回，事件依次为：
+         *     - `created`：`{"id": 文档 ID}`，文档已创建（状态为生成中）
+         *     - `delta`：`{"text": 新生成的一段 Markdown}`，可能有很多个
+         *     - `done`：`{"id": 文档 ID, "warnings": [自动检查发现的问题]}`
+         *     - `error`：`{"message": 错误说明}`
+         *
+         *     老师中途断开连接，生成也会继续并保存。
+         */
+        post: operations["generate_lesson_plan_api_teacher_lesson_plans_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的文档 */
+        get: operations["list_documents_api_teacher_documents_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/documents/{doc_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Document */
+        get: operations["get_document_api_teacher_documents__doc_id__get"];
+        /** 保存文档 */
+        put: operations["update_document_api_teacher_documents__doc_id__put"];
+        post?: never;
+        /** Delete Document */
+        delete: operations["delete_document_api_teacher_documents__doc_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/documents/{doc_id}/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 导出 Word */
+        get: operations["export_docx_api_teacher_documents__doc_id__docx_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ops/tenants": {
         parameters: {
             query?: never;
@@ -583,6 +662,97 @@ export interface components {
             /** Password */
             password: string;
         };
+        /**
+         * DocType
+         * @enum {string}
+         */
+        DocType: "lesson_plan";
+        /** DocumentBrief */
+        DocumentBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Doc Type */
+            doc_type: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string | null;
+            /** Grade */
+            grade: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** DocumentOut */
+        DocumentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Doc Type */
+            doc_type: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string | null;
+            /** Grade */
+            grade: string | null;
+            /** Status */
+            status: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            params: components["schemas"]["LessonPlanIn"] | null;
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Generated Md
+             * @description 只在生成中返回：已生成的部分
+             */
+            generated_md: string | null;
+            /** Warnings */
+            warnings: string[];
+            /** Error */
+            error: string | null;
+            /** Version */
+            version: number;
+        };
+        /** DocumentUpdate */
+        DocumentUpdate: {
+            /** Title */
+            title: string;
+            /** Content */
+            content: {
+                [key: string]: unknown;
+            };
+            /**
+             * Version
+             * @description 读取时拿到的版本号；文档已被别处修改时返回 409
+             */
+            version: number;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -598,6 +768,51 @@ export interface components {
             errors: components["schemas"]["RowError"][];
             /** Credentials */
             credentials: components["schemas"]["Credential"][];
+        };
+        /** LessonPlanIn */
+        LessonPlanIn: {
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "数学" | "英语";
+            /**
+             * Grade
+             * @enum {string}
+             */
+            grade: "七年级上册" | "七年级下册" | "八年级上册" | "八年级下册" | "九年级上册" | "九年级下册";
+            /**
+             * Textbook
+             * @default 人教版
+             */
+            textbook: string;
+            /**
+             * Topic
+             * @description 课题，如：1.2.1 有理数的概念
+             */
+            topic: string;
+            /**
+             * Lesson Type
+             * @default 新授课
+             * @enum {string}
+             */
+            lesson_type: "新授课" | "复习课" | "习题课" | "讲评课";
+            /**
+             * Duration
+             * @description 一节课的时长（分钟）
+             * @default 45
+             */
+            duration: number;
+            /**
+             * Requirements
+             * @description 学情、侧重点等要求
+             */
+            requirements?: string | null;
+            /**
+             * Reference
+             * @description 参考资料：教材原文、已有教案等
+             */
+            reference?: string | null;
         };
         /** MeOut */
         MeOut: {
@@ -1593,6 +1808,198 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClassOut"][];
+                };
+            };
+        };
+    };
+    generate_lesson_plan_api_teacher_lesson_plans_generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonPlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_documents_api_teacher_documents_get: {
+        parameters: {
+            query?: {
+                doc_type?: components["schemas"]["DocType"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentBrief"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_document_api_teacher_documents__doc_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_document_api_teacher_documents__doc_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_document_api_teacher_documents__doc_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_docx_api_teacher_documents__doc_id__docx_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

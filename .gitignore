@@ -20,6 +20,9 @@ refs/pdf/*.pdf
 # 测试用的真实教学资料和试卷：有版权，只在本地使用
 refs/materials/
 
+# 评测运行结果（模型输出，体积大且每次不同）
+evals/*/out/
+
 # 编辑器
 .vscode/*
 !.vscode/extensions.json

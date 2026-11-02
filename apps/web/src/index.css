@@ -26,6 +26,172 @@ body,
   margin: 0 !important;
 }
 
+/* —— 文档：编辑器和生成预览共用排版 —— */
+
+.doc-paper {
+  background: #fff;
+  border: 1px solid #eef0f5;
+  border-radius: 8px;
+}
+
+.doc-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  background: #fff;
+  border-bottom: 1px solid #eef0f5;
+  border-radius: 8px 8px 0 0;
+}
+
+.doc-tool-active.ant-btn {
+  background: #e8efff;
+  color: #2f6fed;
+}
+
+.doc-title-input.ant-input {
+  font-size: 18px;
+  font-weight: 600;
+  padding-inline: 4px;
+}
+
+.doc-preview {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+
+.doc-body {
+  color: #1f2329;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.doc-body .ProseMirror {
+  min-height: 60vh;
+  padding: 24px 48px 48px;
+  outline: none;
+}
+
+.doc-body h1 {
+  font-size: 22px;
+  text-align: center;
+  margin: 8px 0 16px;
+}
+
+.doc-body h2 {
+  font-size: 18px;
+  margin: 24px 0 8px;
+}
+
+.doc-body h3 {
+  font-size: 16px;
+  margin: 16px 0 6px;
+}
+
+.doc-body h4 {
+  font-size: 15px;
+  margin: 12px 0 4px;
+}
+
+.doc-body p {
+  margin: 4px 0;
+}
+
+.doc-body ul,
+.doc-body ol {
+  padding-inline-start: 24px;
+}
+
+.doc-body blockquote {
+  margin: 8px 0;
+  padding-left: 12px;
+  border-left: 3px solid #d0d5dd;
+  color: #555;
+}
+
+.doc-body table {
+  width: 100%;
+  margin: 8px 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.doc-body th,
+.doc-body td {
+  position: relative;
+  padding: 6px 8px;
+  border: 1px solid #d0d5dd;
+  vertical-align: top;
+}
+
+.doc-body th {
+  background: #f5f7fb;
+  font-weight: 600;
+}
+
+.doc-body .tableWrapper {
+  overflow-x: auto;
+}
+
+.doc-body .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(47, 111, 237, 0.12);
+  pointer-events: none;
+}
+
+.doc-body .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background: #2f6fed;
+  pointer-events: none;
+}
+
+.doc-body .resize-cursor {
+  cursor: col-resize;
+}
+
+.doc-body [data-type="inline-math"],
+.doc-body [data-type="block-math"] {
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.doc-body [data-type="inline-math"]:hover,
+.doc-body [data-type="block-math"]:hover {
+  background: #eef3ff;
+}
+
+.math-preview {
+  min-height: 48px;
+  margin: 12px 0 8px;
+  padding: 12px;
+  overflow-x: auto;
+  background: #f5f7fb;
+  border-radius: 6px;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .doc-body .ProseMirror {
+    padding: 16px;
+  }
+
+  .doc-preview {
+    max-height: none;
+    padding: 12px 16px;
+  }
+}
+
 .login-wrap {
   min-height: 100vh;
   display: grid;

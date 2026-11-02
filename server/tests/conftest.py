@@ -43,7 +43,7 @@ from app.devtools.localpg import LocalPostgres  # noqa: E402
 from app.modules.iam import service as iam  # noqa: E402
 from app.modules.iam.models import Role, Tenant  # noqa: E402
 
-TABLES = "ai_usage, audit_log, class_member, klass, campus, user_account, tenant"
+TABLES = "document, ai_usage, audit_log, class_member, klass, campus, user_account, tenant"
 
 
 @pytest.fixture(scope="session", autouse=True)
