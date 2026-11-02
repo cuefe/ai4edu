@@ -67,8 +67,10 @@ class DbUsageSink:
 
     @staticmethod
     def _write(rec: UsageRecord) -> None:
-        from app.ai.models import AiUsage
+        # 从 app.models 导入：要注册全部表，ai_usage 的外键（tenant、user_account）才能解析。
+        # 只导入 AiUsage 时，在 API 进程之外（Celery Worker、脚本）写入会失败
         from app.core.db import session_scope
+        from app.models import AiUsage
 
         try:
             with session_scope(tenant_id=rec.ctx.tenant_id, bypass=rec.ctx.tenant_id is None) as db:

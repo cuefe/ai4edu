@@ -8,6 +8,7 @@ REDIS_URL=memory:// 时任务在当前进程里同步执行，本地开发不需
 
 from celery import Celery
 
+import app.models  # noqa: F401  Worker 进程不经过 app.main，要在这里注册全部表
 from app.core.config import get_settings
 
 settings = get_settings()
