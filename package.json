@@ -1,0 +1,11 @@
+{
+  "name": "ai4edu",
+  "private": true,
+  "packageManager": "pnpm@12.16.1",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "build:web": "pnpm --filter web build",
+    "typecheck": "pnpm --filter web typecheck",
+    "gen:api": "cd server && uv run python -m app.cli openapi --out openapi.json && cd .. && pnpm --filter web gen:api"
+  }
+}

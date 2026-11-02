@@ -1,0 +1,25 @@
+# 依赖与构建产物
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# 本地配置与数据
+.env
+*.local
+server/.data/
+server/openapi.json
+.claude/launch.json
+
+# 大文件参考资料不进仓库
+refs/video/*.mp4
+refs/pdf/*.pdf
+
+# 编辑器
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store

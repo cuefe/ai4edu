@@ -1,0 +1,49 @@
+# 模型路由配置。业务代码只引用技能名（skills），由这里决定用哪个模型。
+#
+# - 供应商的 API Key 从环境变量读取（api_key_env），没配置 Key 的供应商会被跳过。
+# - 每个档位（tiers）按顺序尝试候选模型，失败自动切换到下一个。
+# - model 写固定的模型名；model_env 表示从环境变量读取（火山方舟的模型 ID / 接入点 ID 因账号而异）。
+# - price 单位：元 / 百万 token。不填则用量表里不计算费用。上线前请按各平台官网价格填写。
+# - 所有候选都不可用时，开发环境回退到 mock（AI_ALLOW_MOCK=true），生产环境直接报错。
+
+providers:
+  ark: # 火山方舟（豆包）
+    base_url: https://ark.cn-beijing.volces.com/api/v3
+    api_key_env: ARK_API_KEY
+  deepseek:
+    base_url: https://api.deepseek.com
+    api_key_env: DEEPSEEK_API_KEY
+  dashscope: # 阿里云百炼（通义）
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    api_key_env: DASHSCOPE_API_KEY
+
+tiers:
+  flagship: # 长文生成：教案、讲义、出题
+    - { provider: ark, model_env: ARK_MODEL_FLAGSHIP }
+    - { provider: deepseek, model: deepseek-chat }
+    - { provider: dashscope, model: qwen-max }
+  standard: # 结构化抽取：背诵点、知识点标签
+    - { provider: ark, model_env: ARK_MODEL_STANDARD }
+    - { provider: dashscope, model: qwen-plus }
+    - { provider: deepseek, model: deepseek-chat }
+  reasoning: # 理科解题、答案校验
+    - { provider: deepseek, model: deepseek-reasoner }
+    - { provider: ark, model_env: ARK_MODEL_REASONING }
+  vision: # 拍照作答识别、主观题批改
+    - { provider: ark, model_env: ARK_MODEL_VISION }
+    - { provider: dashscope, model: qwen-vl-plus }
+  fast: # 实时答疑、安全分类
+    - { provider: ark, model_env: ARK_MODEL_FAST }
+    - { provider: dashscope, model: qwen-turbo }
+    - { provider: deepseek, model: deepseek-chat }
+
+skills:
+  ping: fast # 运营后台连通性测试
+  lesson_plan: flagship
+  handout: flagship
+  recite_cards: standard
+  question_gen: flagship
+  answer_check: reasoning
+  grade_subjective: vision
+  tutor: fast
+  safety_classify: fast

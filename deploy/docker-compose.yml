@@ -1,0 +1,62 @@
+# 试点 / 测试环境一键部署：cd deploy && docker compose up -d --build
+# 首次启动后执行迁移：docker compose run --rm api python -m app.cli migrate
+# 生产环境数据库、Redis 用云托管服务，只部署 api、worker、web。
+name: ai4edu
+
+x-api-env: &api-env
+  ENV: ${ENV:-dev}
+  DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/ai4edu
+  APP_DATABASE_URL: postgresql+psycopg://ai4edu_app:ai4edu_app@db:5432/ai4edu
+  REDIS_URL: redis://redis:6379/0
+  JWT_SECRET: ${JWT_SECRET:-}
+  DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-}
+  PHONE_HASH_KEY: ${PHONE_HASH_KEY:-}
+  ARK_API_KEY: ${ARK_API_KEY:-}
+  DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+  DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: ai4edu
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai4edu"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+
+  api:
+    build: ../server
+    environment: *api-env
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+
+  worker:
+    build: ../server
+    command: ["celery", "-A", "app.workers.celery_app", "worker", "-l", "info"]
+    environment: *api-env
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on: [api]
+
+volumes:
+  pgdata:
+  redisdata:

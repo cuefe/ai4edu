@@ -1,0 +1,5 @@
+-- 数据库首次启动时执行：创建应用账号（非超级用户，受行级安全约束）并启用 pgvector。
+-- 生产环境请把密码换掉，并与 APP_DATABASE_URL 保持一致。
+CREATE ROLE ai4edu_app LOGIN PASSWORD 'ai4edu_app' NOSUPERUSER NOBYPASSRLS;
+CREATE EXTENSION IF NOT EXISTS vector;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO ai4edu_app;
