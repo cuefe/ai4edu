@@ -13,6 +13,7 @@ x-api-env: &api-env
   PHONE_HASH_KEY: ${PHONE_HASH_KEY:-}
   DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
   DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+  STORAGE_DIR: /data/files
 
 services:
   db:
@@ -33,9 +34,12 @@ services:
     volumes:
       - redisdata:/data
 
+  # api 接收上传，worker 解析，两者要挂同一个文件卷
   api:
     build: ../server
     environment: *api-env
+    volumes:
+      - files:/data/files
     depends_on:
       db: { condition: service_healthy }
       redis: { condition: service_started }
@@ -44,6 +48,8 @@ services:
     build: ../server
     command: ["celery", "-A", "app.workers.celery_app", "worker", "-l", "info"]
     environment: *api-env
+    volumes:
+      - files:/data/files
     depends_on:
       db: { condition: service_healthy }
       redis: { condition: service_started }
@@ -59,3 +65,4 @@ services:
 volumes:
   pgdata:
   redisdata:
+  files: # 老师上传的资料原文件

@@ -31,6 +31,11 @@ tiers:
   fast: # 实时答疑、安全分类
     - { provider: dashscope, model: qwen-flash }
     - { provider: deepseek, model: deepseek-chat }
+  ocr: # 扫描件、图片转文字
+    - { provider: dashscope, model: qwen-vl-ocr }
+    - { provider: dashscope, model: qwen3-vl-plus }
+  embedding: # 资料检索的向量模型。只用第一个候选；换模型后要重新解析资料，旧向量和新向量不能比较
+    - { provider: dashscope, model: text-embedding-v4 }
 
 skills:
   ping: fast # 运营后台连通性测试
@@ -42,3 +47,5 @@ skills:
   grade_subjective: vision
   tutor: fast
   safety_classify: fast
+  ocr: ocr
+  embed: embedding

@@ -5,6 +5,7 @@ import {
   DownOutlined,
   EditOutlined,
   FileTextOutlined,
+  FolderOpenOutlined,
   HomeOutlined,
   LogoutOutlined,
   MenuOutlined,
@@ -61,6 +62,7 @@ export function AppLayout() {
       children: [
         { key: "/teacher", icon: <HomeOutlined />, label: "我的班级" },
         { key: "/teacher/lesson-plans", icon: <EditOutlined />, label: "AI 备课" },
+        { key: "/teacher/resources", icon: <FolderOpenOutlined />, label: "资料库" },
         { key: "soon-qbank", icon: <BookOutlined />, label: <>题库{SOON}</>, disabled: true },
         { key: "soon-homework", icon: <FileTextOutlined />, label: <>作业{SOON}</>, disabled: true },
       ],

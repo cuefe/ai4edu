@@ -131,21 +131,25 @@ def save_draft(tenant_id: uuid.UUID, doc_id: uuid.UUID, md: str) -> None:
         )
 
 
-def finish_generation(tenant_id: uuid.UUID, doc_id: uuid.UUID, md: str, warnings: list[str]) -> None:
+def finish_generation(
+    tenant_id: uuid.UUID,
+    doc_id: uuid.UUID,
+    md: str,
+    warnings: list[str],
+    sources: list[dict[str, Any]] | None = None,
+) -> None:
     # 不限定状态：生成慢、已被判定为中断的文档，最后完成了也照样保存
     with session_scope(tenant_id=tenant_id) as db:
-        db.execute(
-            update(Document)
-            .where(Document.id == doc_id)
-            .values(
-                status=DocStatus.READY,
-                generated_md=md,
-                content=markdown_to_doc(md),
-                warnings=warnings,
-                error=None,
-                updated_at=func.now(),
-            )
-        )
+        doc = db.get(Document, doc_id)
+        if doc is None:  # 生成过程中被删除了
+            return
+        doc.status = DocStatus.READY
+        doc.generated_md = md
+        doc.content = markdown_to_doc(md)
+        doc.warnings = warnings
+        doc.error = None
+        if sources:
+            doc.params = {**doc.params, "sources": sources}  # 记下引用了哪些片段，方便追溯
 
 
 def fail_generation(tenant_id: uuid.UUID, doc_id: uuid.UUID, error: str, md: str | None) -> None:

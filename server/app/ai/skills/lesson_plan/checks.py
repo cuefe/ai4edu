@@ -19,9 +19,10 @@ SECTIONS = [
 _PROCESS = re.compile(r"^##[ \t][^\n]*教学过程[^\n]*\n(.*?)(?=^##[ \t]|\Z)", re.M | re.S)
 _STEP_MINUTES = re.compile(r"^###[^\n]*?[（(]\s*约?\s*(\d+)\s*分钟\s*[)）]", re.M)
 _PAGE_REF = re.compile(r"第\s*\d+\s*页")
+_CITATION = re.compile(r"\[(\d{1,2})\]")
 
 
-def check_output(md: str, p: LessonPlanIn) -> list[str]:
+def check_output(md: str, p: LessonPlanIn, n_sources: int = 0) -> list[str]:
     warnings: list[str] = []
 
     missing = [s for s in SECTIONS if not re.search(rf"^##[ \t][^\n]*{s}", md, re.M)]
@@ -36,6 +37,11 @@ def check_output(md: str, p: LessonPlanIn) -> list[str]:
         elif sum(minutes) != p.duration:
             warnings.append(f"教学过程各环节合计 {sum(minutes)} 分钟，和课时 {p.duration} 分钟对不上")
 
-    if _PAGE_REF.search(md) and not (p.reference and _PAGE_REF.search(p.reference)):
+    # 资料库片段的标签里带页码（如"第 3 页"），引用资料时提到页码是正常的
+    if _PAGE_REF.search(md) and not n_sources and not (p.reference and _PAGE_REF.search(p.reference)):
         warnings.append("教案里提到了教材页码，AI 可能记错，请对照教材核实")
+
+    bad = sorted({int(n) for n in _CITATION.findall(md) if not 1 <= int(n) <= n_sources})
+    if bad and n_sources:
+        warnings.append(f"正文引用了不存在的资料编号 {'、'.join(f'[{n}]' for n in bad)}，请删除")
     return warnings

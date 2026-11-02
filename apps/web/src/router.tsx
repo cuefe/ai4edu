@@ -12,6 +12,7 @@ import { StudentsPage } from "./pages/org/StudentsPage";
 import { TeachersPage } from "./pages/org/TeachersPage";
 import { StudentHome } from "./pages/student/StudentHome";
 import { LessonPlansPage } from "./pages/teacher/LessonPlansPage";
+import { ResourcesPage } from "./pages/teacher/ResourcesPage";
 import { TeacherHome } from "./pages/teacher/TeacherHome";
 
 // 编辑器、公式、Markdown 渲染体积较大，只在打开这些页面时加载
@@ -81,6 +82,7 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <TeacherHome /> },
               { path: "lesson-plans", element: <LessonPlansPage /> },
+              { path: "resources", element: <ResourcesPage /> },
               {
                 path: "lesson-plans/new",
                 element: (

@@ -1,17 +1,73 @@
-import { ThunderboltOutlined } from "@ant-design/icons";
+import { FolderOpenOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, App, AutoComplete, Button, Card, Col, Collapse, Empty, Form, Input, InputNumber, Row, Select, Spin, Typography } from "antd";
+import { Alert, App, AutoComplete, Button, Card, Col, Collapse, Empty, Form, Input, InputNumber, Row, Select, Space, Spin, Switch, Tag, Typography } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { api, unwrap } from "@/api/client";
 import { postSSE } from "@/api/sse";
 import { MarkdownView } from "@/components/MarkdownView";
 import { PageHead } from "@/components/PageHead";
 import { GRADES, LESSON_TYPES, SUBJECTS, TEXTBOOKS, type LessonPlanIn } from "./lessonPlanOptions";
 
-const DEFAULTS: Partial<LessonPlanIn> = { subject: "数学", grade: "七年级上册", textbook: "人教版", lesson_type: "新授课", duration: 45 };
+const DEFAULTS: Partial<LessonPlanIn> = {
+  subject: "数学",
+  grade: "七年级上册",
+  textbook: "人教版",
+  lesson_type: "新授课",
+  duration: 45,
+  use_library: true,
+  resource_ids: [],
+};
 
 type Phase = "idle" | "streaming" | "error";
+type SourceItem = { n: number; resource_id: string; label: string };
+
+function LibraryField({ subject, enabled }: { subject?: string; enabled: boolean }) {
+  const resources = useQuery({
+    queryKey: ["teacher", "resources"],
+    queryFn: async () => unwrap(await api.GET("/api/teacher/resources")),
+  });
+  // 只列出解析完成、学科匹配（或不限学科）的资料，和后端检索的范围一致
+  const options = (resources.data ?? [])
+    .filter((r) => r.status === "ready" && (!r.subject || r.subject === subject))
+    .map((r) => ({ value: r.id, label: r.mine ? r.filename : `${r.filename}（${r.owner_name}）` }));
+  return (
+    <>
+      <Form.Item label="参考资料库" style={{ marginBottom: 8 }}>
+        <Space>
+          <Form.Item name="use_library" valuePropName="checked" noStyle>
+            <Switch />
+          </Form.Item>
+          <Typography.Text type="secondary">按课题检索相关内容，教案里标注出处</Typography.Text>
+        </Space>
+      </Form.Item>
+      {enabled && (
+        <Form.Item
+          name="resource_ids"
+          extra={
+            options.length === 0 && !resources.isLoading ? (
+              <>
+                资料库里还没有{subject}资料，<Link to="/teacher/resources">去上传</Link>
+              </>
+            ) : (
+              "不选就在全部资料里检索"
+            )
+          }
+        >
+          <Select
+            mode="multiple"
+            allowClear
+            loading={resources.isLoading}
+            options={options}
+            placeholder="只参考这几份资料（选填）"
+            showSearch={{ optionFilterProp: "label" }}
+            maxCount={20}
+          />
+        </Form.Item>
+      )}
+    </>
+  );
+}
 
 export function LessonPlanNewPage() {
   const navigate = useNavigate();
@@ -22,6 +78,9 @@ export function LessonPlanNewPage() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const [sources, setSources] = useState<SourceItem[]>([]);
+  const subject = Form.useWatch("subject", form);
+  const useLibrary = Form.useWatch("use_library", form);
   const abortRef = useRef<AbortController | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +108,7 @@ export function LessonPlanNewPage() {
     setPhase("streaming");
     setText("");
     setError("");
+    setSources([]);
     // 攒一小段再刷新，避免每个字都重新渲染整篇 Markdown
     let buffer = "";
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -63,8 +123,10 @@ export function LessonPlanNewPage() {
         "/api/teacher/lesson-plans/generate",
         values,
         (event, data) => {
-          const d = data as { id?: string; text?: string; message?: string };
-          if (event === "delta" && d.text) {
+          const d = data as { id?: string; text?: string; message?: string; items?: SourceItem[] };
+          if (event === "sources" && d.items) {
+            setSources(d.items);
+          } else if (event === "delta" && d.text) {
             buffer += d.text;
             timer ??= setTimeout(flush, 100);
           } else if (event === "done") {
@@ -134,6 +196,7 @@ export function LessonPlanNewPage() {
                     placeholder="例如：学生基础较弱，多安排小组合作；重点讲数轴上的表示"
                   />
                 </Form.Item>
+                <LibraryField subject={subject} enabled={useLibrary !== false} />
                 <Collapse
                   ghost
                   size="small"
@@ -141,7 +204,7 @@ export function LessonPlanNewPage() {
                   items={[
                     {
                       key: "ref",
-                      label: "参考资料（选填）",
+                      label: "粘贴参考资料（选填）",
                       forceRender: true,
                       children: (
                         <Form.Item
@@ -176,6 +239,16 @@ export function LessonPlanNewPage() {
                 description="可以稍后重试；如果已经生成了一部分，能在教案列表里看到。"
                 style={{ margin: 16 }}
               />
+            )}
+            {sources.length > 0 && (
+              <div className="doc-sources">
+                <FolderOpenOutlined /> 参考了资料库中的 {sources.length} 个片段：
+                {sources.map((s) => (
+                  <Tag key={s.n} style={{ marginInlineEnd: 4 }}>
+                    [{s.n}] {s.label}
+                  </Tag>
+                ))}
+              </div>
             )}
             <div ref={previewRef} className="doc-preview">
               {text ? (

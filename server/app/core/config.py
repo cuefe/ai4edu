@@ -36,6 +36,10 @@ class Settings(BaseSettings):
 
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
+    # 上传文件存放目录。试点阶段用本地磁盘（Docker 里挂数据卷），规模化时换成 OSS
+    storage_dir: Path = SERVER_DIR / ".data" / "files"
+    max_upload_mb: int = 50
+
     ai_config_path: Path = SERVER_DIR / "app" / "ai" / "gateway" / "models.yaml"
     ai_allow_mock: bool = True  # 没有可用模型时回退到 mock，生产环境必须关掉
 

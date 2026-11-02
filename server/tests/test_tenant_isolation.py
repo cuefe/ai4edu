@@ -85,5 +85,7 @@ def test_app_role_is_not_superuser(owner_conn):
         "class_member",
         "document",
         "klass",
+        "resource_chunk",
+        "resource_file",
         "user_account",
     ]

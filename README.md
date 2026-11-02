@@ -8,7 +8,8 @@
 当前进度：**M1 备课与题库**进行中。
 - M0 已完成：账号与登录、机构/班级/师生管理、Excel 批量导入学生、跨机构数据隔离、模型网关与用量统计。
 - M1 已完成 **AI 生成教案**：填课题流式生成，在线编辑（表格、公式），自动保存，导出 Word（公式是 Word 原生公式）。
-- M1 待做：资料上传解析与检索（RAG）、讲义和背诵点生成、出题与校验。
+- M1 已完成 **资料库**：上传 PDF、Word、PPT、图片，自动解析（扫描件和图片用通义 OCR 识别），切片段、向量化；生成教案时按课题检索，正文标注引用并附出处；资料可共享给本机构老师。
+- M1 待做：讲义和背诵点生成、出题与校验。
 
 ## 目录
 
@@ -16,9 +17,10 @@
 apps/web/          前端（React + Vite + Ant Design）：教师端、学生端、机构管理、平台运营
 server/            后端（FastAPI + SQLAlchemy + Celery）
   app/core/        配置、数据库与租户隔离、认证
-  app/modules/     业务模块：iam 账号、org 机构班级、content 教案等文档、ops 运营
+  app/modules/     业务模块：iam 账号、org 机构班级、content 教案等文档、library 资料库、ops 运营
   app/ai/gateway/  模型网关；models.yaml 配置技能 → 模型路由
   app/ai/skills/   AI 技能：每个技能一个目录（输入结构、prompt、输出检查）
+  app/ai/parsing/  资料解析：PDF、Word、PPT、图片 → 文本块 → 检索片段
   migrations/      数据库迁移（Alembic）
   tests/           后端测试
 deploy/            Docker Compose、Nginx 配置
@@ -93,5 +95,8 @@ cd server && uv run python -m app.cli db-stop
 - 前端用 TypeScript 5：生成接口类型的 openapi-typescript 还不支持 TypeScript 7。
 - Langfuse 调用追踪还没接入；目前每次模型调用都记在 `ai_usage` 表里。
 - 教案生成在 API 进程的后台任务里跑，还没进 Celery：老师关掉页面不影响生成，但服务重启会中断正在生成的教案（显示为失败，可重新生成）。并发量上来后再改。
-- 教案还不能引用上传的资料（资料解析和检索是 M1 的下一项），目前老师可以把教材原文粘贴到"参考资料"里。
 - 文档没有历史版本表（`document_version`），只用版本号防止多个窗口互相覆盖。
+- 资料解析没用 MinerU：有文字层的 PDF、Word、PPT 在本地提取文字，扫描页和图片用通义 `qwen-vl-ocr` 识别，效果够用、不用另开账号。Word 里插入的图片（含 MathType 公式图片）暂不识别；老版本 `.doc`、`.ppt` 不支持，提示老师另存为新格式。
+- 上传文件存在本地磁盘（Docker 里挂 `files` 数据卷，API 和 Worker 共用），文件经后端上传，不是前端直传 OSS。规模化时换 OSS，只改 `app/core/storage.py`。
+- 检索只用向量（通义 `text-embedding-v4`）加字面重合加分，没用 zhparser 关键词检索和重排模型；向量没建 HNSW 索引（按机构、老师过滤后数据量小，精确计算更准）。换向量模型后要重新解析资料。
+- 本地开发没有 Celery Worker，资料解析在 API 进程的后台线程里跑（`app/workers/dispatch.py`）；配了 Redis 时进 Celery 队列。

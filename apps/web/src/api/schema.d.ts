@@ -379,6 +379,7 @@ export interface paths {
          * AI 生成教案
          * @description 以 Server-Sent Events 流式返回，事件依次为：
          *     - `created`：`{"id": 文档 ID}`，文档已创建（状态为生成中）
+         *     - `sources`：`{"items": [{"n", "resource_id", "chunk_id", "label"}]}`，从资料库检索到的参考片段（没有就不发）
          *     - `delta`：`{"text": 新生成的一段 Markdown}`，可能有很多个
          *     - `done`：`{"id": 文档 ID, "warnings": [自动检查发现的问题]}`
          *     - `error`：`{"message": 错误说明}`
@@ -437,6 +438,111 @@ export interface paths {
         };
         /** 导出 Word */
         get: operations["export_docx_api_teacher_documents__doc_id__docx_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/resources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的资料（含本机构共享的） */
+        get: operations["list_resources_api_teacher_resources_get"];
+        put?: never;
+        /** 上传资料，上传后自动解析 */
+        post: operations["upload_api_teacher_resources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/resources/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 在资料库里检索 */
+        post: operations["search_api_teacher_resources_search_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/resources/{rid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Resource */
+        get: operations["get_resource_api_teacher_resources__rid__get"];
+        put?: never;
+        post?: never;
+        /** Delete Resource */
+        delete: operations["delete_resource_api_teacher_resources__rid__delete"];
+        options?: never;
+        head?: never;
+        /** 修改学科、共享设置 */
+        patch: operations["update_resource_api_teacher_resources__rid__patch"];
+        trace?: never;
+    };
+    "/api/teacher/resources/{rid}/reparse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 重新解析 */
+        post: operations["reparse_api_teacher_resources__rid__reparse_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/resources/{rid}/chunks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 解析出的片段 */
+        get: operations["list_chunks_api_teacher_resources__rid__chunks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/resources/{rid}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 下载原文件 */
+        get: operations["download_api_teacher_resources__rid__file_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -587,6 +693,18 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_upload_api_teacher_resources_post */
+        Body_upload_api_teacher_resources_post: {
+            /** File */
+            file: string;
+            /** Subject */
+            subject?: string | null;
+            /**
+             * Shared
+             * @default false
+             */
+            shared: boolean;
+        };
         /** CampusIn */
         CampusIn: {
             /** Name */
@@ -608,6 +726,19 @@ export interface components {
             old_password: string;
             /** New Password */
             new_password: string;
+        };
+        /** ChunkOut */
+        ChunkOut: {
+            /** Seq */
+            seq: number;
+            /** Heading */
+            heading: string;
+            /** Page Start */
+            page_start: number | null;
+            /** Page End */
+            page_end: number | null;
+            /** Text */
+            text: string;
         };
         /** ClassIn */
         ClassIn: {
@@ -813,6 +944,17 @@ export interface components {
              * @description 参考资料：教材原文、已有教案等
              */
             reference?: string | null;
+            /**
+             * Use Library
+             * @description 从资料库里检索相关片段作为参考
+             * @default true
+             */
+            use_library: boolean;
+            /**
+             * Resource Ids
+             * @description 只在这些资料里检索；为空时检索整个资料库
+             */
+            resource_ids?: string[];
         };
         /** MeOut */
         MeOut: {
@@ -882,12 +1024,112 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** ResourceOut */
+        ResourceOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Filename */
+            filename: string;
+            /** Size */
+            size: number;
+            /** Subject */
+            subject: string | null;
+            /** Shared */
+            shared: boolean;
+            /** Status */
+            status: string;
+            /** Progress */
+            progress: number;
+            /**
+             * Error
+             * @description 失败原因；解析成功但部分页没识别出来时也会有提示
+             */
+            error: string | null;
+            /** Pages */
+            pages: number;
+            /** Ocr Pages */
+            ocr_pages: number;
+            /** Chunk Count */
+            chunk_count: number;
+            /** Owner Name */
+            owner_name: string;
+            /**
+             * Mine
+             * @description 是不是自己上传的；别人共享的只能查看和检索
+             */
+            mine: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ResourcePatch */
+        ResourcePatch: {
+            /** Subject */
+            subject?: string | null;
+            /** Shared */
+            shared?: boolean | null;
+        };
         /** RowError */
         RowError: {
             /** Row */
             row: number;
             /** Message */
             message: string;
+        };
+        /** SearchHit */
+        SearchHit: {
+            /**
+             * Chunk Id
+             * Format: uuid
+             */
+            chunk_id: string;
+            /**
+             * Resource Id
+             * Format: uuid
+             */
+            resource_id: string;
+            /** Filename */
+            filename: string;
+            /** Heading */
+            heading: string;
+            /** Page Start */
+            page_start: number | null;
+            /** Page End */
+            page_end: number | null;
+            /** Text */
+            text: string;
+            /**
+             * Score
+             * @description 相关度，0～1
+             */
+            score: number;
+        };
+        /** SearchIn */
+        SearchIn: {
+            /** Query */
+            query: string;
+            /**
+             * Resource Ids
+             * @description 只在这些资料里找
+             */
+            resource_ids?: string[];
+            /** Subject */
+            subject?: string | null;
+            /**
+             * K
+             * @default 6
+             */
+            k: number;
         };
         /** SmsLoginIn */
         SmsLoginIn: {
@@ -1979,6 +2221,282 @@ export interface operations {
             header?: never;
             path: {
                 doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_resources_api_teacher_resources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceOut"][];
+                };
+            };
+        };
+    };
+    upload_api_teacher_resources_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_api_teacher_resources_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    search_api_teacher_resources_search_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchHit"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_resource_api_teacher_resources__rid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_resource_api_teacher_resources__rid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_resource_api_teacher_resources__rid__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResourcePatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reparse_api_teacher_resources__rid__reparse_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResourceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_chunks_api_teacher_resources__rid__chunks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChunkOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_api_teacher_resources__rid__file_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rid: string;
             };
             cookie?: never;
         };

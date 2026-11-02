@@ -5,8 +5,10 @@
 """
 
 import logging
+import math
 import time
 import uuid
+import zlib
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -17,13 +19,16 @@ import anyio
 from openai import AsyncOpenAI
 
 from app.ai.gateway.config import MOCK, Candidate, GatewayConfig
-from app.ai.gateway.redact import redact_messages
+from app.ai.gateway.redact import redact_messages, redact_text
 from app.core.config import SERVER_DIR, get_settings
 from app.core.errors import AppError
 
 log = logging.getLogger(__name__)
 
 Messages = list[dict[str, Any]]
+
+EMBED_DIM = 1024  # 和数据库里向量列的维度一致
+EMBED_BATCH = 10  # 通义向量模型每次最多 10 条
 
 
 @dataclass(frozen=True)
@@ -95,6 +100,16 @@ class DbUsageSink:
 
 def _estimate_tokens(text: str) -> int:
     return max(1, len(text) // 2)
+
+
+def _mock_embedding(text: str) -> list[float]:
+    """mock 向量：字和相邻两字的哈希词袋。没有语义，但字面相近的文本相似度高，够开发和测试用。"""
+    vec = [0.0] * EMBED_DIM
+    s = "".join(text.lower().split())
+    for gram in [*s, *(s[i : i + 2] for i in range(len(s) - 1))]:
+        vec[zlib.crc32(gram.encode()) % EMBED_DIM] += 1.0
+    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
+    return [v / norm for v in vec]
 
 
 def _last_user_text(messages: Messages) -> str:
@@ -225,6 +240,47 @@ class AIGateway:
             return
         raise AppError("AI 服务暂时不可用，请稍后再试", code="ai_unavailable", status=503)
 
+    async def embed(self, skill: str, texts: list[str], *, ctx: CallContext) -> tuple[str, list[list[float]]]:
+        """文本向量化，返回（模型标识，向量列表）。
+
+        不同模型的向量不能放在一起比较，所以只用第一个候选、不切换备用；模型标识要和向量一起存下来，
+        检索时只比较同一模型的向量。
+        """
+        candidates = self.candidates(skill)
+        if not candidates:
+            raise AppError("AI 服务暂时不可用，请稍后再试", code="ai_unavailable", status=503)
+        c = candidates[0]
+        texts = [redact_text(t) for t in texts]
+        vectors: list[list[float]] = []
+        tokens = 0
+        started = time.monotonic()
+        try:
+            for i in range(0, len(texts), EMBED_BATCH):
+                batch = texts[i : i + EMBED_BATCH]
+                if c is MOCK:
+                    vectors += [_mock_embedding(t) for t in batch]
+                    tokens += sum(_estimate_tokens(t) for t in batch)
+                    continue
+                resp = await self._client(c).embeddings.create(
+                    model=c.model, input=batch, dimensions=EMBED_DIM
+                )
+                vectors += [d.embedding for d in sorted(resp.data, key=lambda d: d.index)]
+                tokens += resp.usage.prompt_tokens if resp.usage else 0
+        except Exception as exc:
+            latency = int((time.monotonic() - started) * 1000)
+            await self._record(
+                UsageRecord(ctx, skill, c, tokens, 0, latency, ok=False, error=repr(exc)[:500])
+            )
+            raise AppError("AI 服务暂时不可用，请稍后再试", code="ai_unavailable", status=503) from exc
+        latency = int((time.monotonic() - started) * 1000)
+        await self._record(UsageRecord(ctx, skill, c, tokens, 0, latency))
+        return f"{c.provider}/{c.model}", vectors
+
+    def embed_model(self, skill: str) -> str | None:
+        """当前会用哪个向量模型（与 embed 返回的标识一致）。"""
+        candidates = self.candidates(skill)
+        return f"{candidates[0].provider}/{candidates[0].model}" if candidates else None
+
     @staticmethod
     async def _mock_stream(skill: str, messages: Messages) -> AsyncIterator[str]:
         text = f"[mock:{skill}] {_last_user_text(messages)}"
@@ -232,10 +288,16 @@ class AIGateway:
             yield text[i : i + 8]
 
 
-@lru_cache
-def get_gateway() -> AIGateway:
+def build_gateway() -> AIGateway:
+    """新建网关实例。后台任务在自己的事件循环里运行，要用新实例：客户端的连接池绑定在创建它的事件循环上。"""
     settings = get_settings()
     # 测试时不读 .env，避免开发者本地配置的真实 Key 被测试调用
     env_file = None if settings.env == "test" else SERVER_DIR / ".env"
     config = GatewayConfig.load(settings.ai_config_path, env_file)
     return AIGateway(config, sink=DbUsageSink(), allow_mock=settings.ai_allow_mock and not settings.is_prod)
+
+
+@lru_cache
+def get_gateway() -> AIGateway:
+    """API 进程共用的网关实例。"""
+    return build_gateway()

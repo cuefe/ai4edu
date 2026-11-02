@@ -7,6 +7,7 @@ from app.core.config import Settings, get_settings
 from app.core.errors import AppError, app_error_handler
 from app.modules.content.router import router as content_router
 from app.modules.iam.router import auth_router, me_router
+from app.modules.library.router import router as library_router
 from app.modules.ops.router import router as ops_router
 from app.modules.org.router import org_router, student_router, teacher_router
 
@@ -60,6 +61,7 @@ def create_app() -> FastAPI:
         teacher_router,
         student_router,
         content_router,
+        library_router,
         ops_router,
     ):
         api.include_router(router)

@@ -1,4 +1,4 @@
-import { BookOutlined, EditOutlined, FileTextOutlined } from "@ant-design/icons";
+import { BookOutlined, EditOutlined, FileTextOutlined, FolderOpenOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Col, Drawer, Empty, Row, Statistic, Table, Tag, Typography } from "antd";
 import { useState } from "react";
@@ -11,6 +11,7 @@ type ClassOut = Schemas["ClassOut"];
 
 const TOOLS = [
   { icon: <EditOutlined />, title: "AI 备课", desc: "填课题，几分钟生成可编辑的教案，导出 Word", to: "/teacher/lesson-plans/new" },
+  { icon: <FolderOpenOutlined />, title: "资料库", desc: "上传教案、课件、试卷，AI 备课时自动参考并标注出处", to: "/teacher/resources" },
 ];
 
 const COMING = [

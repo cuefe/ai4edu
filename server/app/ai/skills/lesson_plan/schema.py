@@ -1,3 +1,5 @@
+import uuid
+from dataclasses import dataclass
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -18,3 +20,15 @@ class LessonPlanIn(BaseModel):
     duration: int = Field(default=45, ge=30, le=90, description="一节课的时长（分钟）")
     requirements: str | None = Field(default=None, max_length=1000, description="学情、侧重点等要求")
     reference: str | None = Field(default=None, max_length=8000, description="参考资料：教材原文、已有教案等")
+    use_library: bool = Field(default=True, description="从资料库里检索相关片段作为参考")
+    resource_ids: list[uuid.UUID] = Field(
+        default_factory=list, max_length=20, description="只在这些资料里检索；为空时检索整个资料库"
+    )
+
+
+@dataclass
+class Source:
+    """资料库检索到的片段，在教案里按编号引用。"""
+
+    label: str  # 如：《有理数.pptx》第 3 页
+    text: str

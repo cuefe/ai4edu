@@ -18,6 +18,7 @@ def _free_port() -> int:
 PORT = _free_port()
 DB = "ai4edu_test"
 APP_ROLE = "ai4edu_app"
+STORAGE = tempfile.TemporaryDirectory(prefix="ai4edu-files-", ignore_cleanup_errors=True)
 os.environ.update(
     ENV="test",
     DATABASE_URL=f"postgresql+psycopg://postgres@127.0.0.1:{PORT}/{DB}",
@@ -25,6 +26,7 @@ os.environ.update(
     APP_DB_ROLE=APP_ROLE,
     REDIS_URL="memory://",
     AI_ALLOW_MOCK="true",
+    STORAGE_DIR=STORAGE.name,
 )
 # 确保真实的模型 Key 不会被测试用到
 for key in ("DEEPSEEK_API_KEY", "DASHSCOPE_API_KEY"):
@@ -43,7 +45,20 @@ from app.devtools.localpg import LocalPostgres  # noqa: E402
 from app.modules.iam import service as iam  # noqa: E402
 from app.modules.iam.models import Role, Tenant  # noqa: E402
 
-TABLES = "document, ai_usage, audit_log, class_member, klass, campus, user_account, tenant"
+TABLES = ", ".join(
+    [
+        "resource_chunk",
+        "resource_file",
+        "document",
+        "ai_usage",
+        "audit_log",
+        "class_member",
+        "klass",
+        "campus",
+        "user_account",
+        "tenant",
+    ]
+)
 
 
 @pytest.fixture(scope="session", autouse=True)

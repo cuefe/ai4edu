@@ -28,6 +28,7 @@ Teacher = Depends(require_roles(Role.TEACHER))
 
 _SSE_DOC = """以 Server-Sent Events 流式返回，事件依次为：
 - `created`：`{"id": 文档 ID}`，文档已创建（状态为生成中）
+- `sources`：`{"items": [{"n", "resource_id", "chunk_id", "label"}]}`，从资料库检索到的参考片段（没有就不发）
 - `delta`：`{"text": 新生成的一段 Markdown}`，可能有很多个
 - `done`：`{"id": 文档 ID, "warnings": [自动检查发现的问题]}`
 - `error`：`{"message": 错误说明}`
