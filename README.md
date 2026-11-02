@@ -67,7 +67,7 @@ cd server && uv run python -m app.cli db-stop
 
 ### 接入大模型
 
-复制 `server/.env.example` 为 `server/.env`，至少填一家的 API Key（火山方舟、DeepSeek、阿里云百炼），重启后端。在「平台运营 → AI 模型」页面可以看到每个技能实际会用哪个模型，并发送测试请求。不配置时开发环境使用 mock 模型（原样回显输入）。
+复制 `server/.env.example` 为 `server/.env`，填写 DeepSeek 和阿里云百炼（通义）的 API Key，重启后端。只填一家时，缺对应模型的技能在开发环境回退到 mock，在生产环境报错（比如没有通义就不能拍照批改）。在「平台运营 → AI 模型」页面可以看到每个技能实际会用哪个模型，并发送测试请求。不配置时开发环境使用 mock 模型（原样回显输入）。
 
 模型路由和价格在 `server/app/ai/gateway/models.yaml` 里配置。
 

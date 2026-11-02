@@ -36,7 +36,7 @@ export function AiPage() {
           type="warning"
           showIcon
           title="还没有配置任何大模型 API Key，当前使用 mock 模型（只回显输入）"
-          description="在 server/.env 里填写 ARK_API_KEY、DEEPSEEK_API_KEY 或 DASHSCOPE_API_KEY 后重启后端。"
+          description="在 server/.env 里填写 DEEPSEEK_API_KEY 和 DASHSCOPE_API_KEY 后重启后端。"
         />
       )}
       <Card title="技能与模型路由" size="small">

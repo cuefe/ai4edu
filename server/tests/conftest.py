@@ -27,7 +27,7 @@ os.environ.update(
     AI_ALLOW_MOCK="true",
 )
 # 确保真实的模型 Key 不会被测试用到
-for key in ("ARK_API_KEY", "DEEPSEEK_API_KEY", "DASHSCOPE_API_KEY"):
+for key in ("DEEPSEEK_API_KEY", "DASHSCOPE_API_KEY"):
     os.environ.pop(key, None)
 
 import psycopg  # noqa: E402

@@ -1,7 +1,7 @@
 """模型网关：业务代码统一从这里调用大模型。
 
 职责：按技能选模型、失败切换备用模型、去除个人信息、记录每次调用的用量和费用。
-三家供应商（豆包 / DeepSeek / 通义）都提供 OpenAI 兼容接口，所以统一用 openai SDK 调用。
+供应商（目前是 DeepSeek、通义）都提供 OpenAI 兼容接口，所以统一用 openai SDK 调用。
 """
 
 import logging
