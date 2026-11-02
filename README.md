@@ -5,11 +5,13 @@
 - 功能规划：[docs/功能规划.md](docs/功能规划.md)
 - 技术方案：[docs/技术方案.md](docs/技术方案.md)
 
-当前进度：**M1 备课与题库**进行中。
-- M0 已完成：账号与登录、机构/班级/师生管理、Excel 批量导入学生、跨机构数据隔离、模型网关与用量统计。
-- M1 已完成 **AI 生成教案**：填课题流式生成，在线编辑（表格、公式），自动保存，导出 Word（公式是 Word 原生公式）。
-- M1 已完成 **资料库**：上传 PDF、Word、PPT、图片，自动解析（扫描件和图片用通义 OCR 识别），切片段、向量化；生成教案时按课题检索，正文标注引用并附出处；资料可共享给本机构老师。
-- M1 待做：讲义和背诵点生成、出题与校验。
+当前进度：**M1 备课与题库**已完成，下一步 M2 学生闭环（布置作业、批改、错题本、背诵复习、问一问）。
+- M0：账号与登录、机构/班级/师生管理、Excel 批量导入学生、跨机构数据隔离、模型网关与用量统计。
+- M1 **AI 生成教案**：填课题流式生成，在线编辑（表格、公式），自动保存，导出 Word（公式是 Word 原生公式）。
+- M1 **资料库**：上传 PDF、Word、PPT、图片，自动解析（扫描件和图片用通义 OCR 识别），切片段、向量化；生成时按课题检索，正文标注引用并附出处；资料可共享给本机构老师。
+- M1 **AI 讲义**：给学生的课堂讲义（学习目标、知识梳理并标出考点、例题、易错提醒、练习和答案）或复习讲义（按考点梳理）；和教案共用编辑器、Word 导出、资料库引用。
+- M1 **背诵卡片**：从讲义、教案或粘贴的材料里抽取必背内容，做成问答卡和挖空卡，老师可修改，带自测预览。
+- M1 **题库与 AI 出题**：按知识点、题型、难度出题；推理模型在看不到答案的情况下独立求解，和题目答案比对（规则、数值、模型三种比对），有分歧的标红并说明原因；老师审核后入库，入库的题本机构老师共享。也可以手动录题。
 
 ## 目录
 
@@ -17,7 +19,7 @@
 apps/web/          前端（React + Vite + Ant Design）：教师端、学生端、机构管理、平台运营
 server/            后端（FastAPI + SQLAlchemy + Celery）
   app/core/        配置、数据库与租户隔离、认证
-  app/modules/     业务模块：iam 账号、org 机构班级、content 教案等文档、library 资料库、ops 运营
+  app/modules/     业务模块：iam 账号、org 机构班级、content 教案和讲义、recite 背诵卡片、qbank 题库、library 资料库、ops 运营
   app/ai/gateway/  模型网关；models.yaml 配置技能 → 模型路由
   app/ai/skills/   AI 技能：每个技能一个目录（输入结构、prompt、输出检查）
   app/ai/parsing/  资料解析：PDF、Word、PPT、图片 → 文本块 → 检索片段
@@ -99,4 +101,8 @@ cd server && uv run python -m app.cli db-stop
 - 资料解析没用 MinerU：有文字层的 PDF、Word、PPT 在本地提取文字，扫描页和图片用通义 `qwen-vl-ocr` 识别，效果够用、不用另开账号。Word 里插入的图片（含 MathType 公式图片）暂不识别；老版本 `.doc`、`.ppt` 不支持，提示老师另存为新格式。
 - 上传文件存在本地磁盘（Docker 里挂 `files` 数据卷，API 和 Worker 共用），文件经后端上传，不是前端直传 OSS。规模化时换 OSS，只改 `app/core/storage.py`。
 - 检索只用向量（通义 `text-embedding-v4`）加字面重合加分，没用 zhparser 关键词检索和重排模型；向量没建 HNSW 索引（按机构、老师过滤后数据量小，精确计算更准）。换向量模型后要重新解析资料。
-- 本地开发没有 Celery Worker，资料解析在 API 进程的后台线程里跑（`app/workers/dispatch.py`）；配了 Redis 时进 Celery 队列。
+- 本地开发没有 Celery Worker，资料解析、出题校验在 API 进程的后台线程里跑（`app/workers/dispatch.py`）；配了 Redis 时进 Celery 队列。
+- 背诵卡片单独一个模块 `recite`（方案里归在 `content`），多了卡片组表 `recite_deck`：M2 布置背诵任务时按卡片组布置。抽取卡片几十秒就能完成，在请求里同步执行。
+- 题目的知识点暂时是文字标签，没有 `question_kp` 关联表：知识点树（`curriculum` 模块）还没做。
+- 答案校验没用 SymPy：推理模型独立求解后，先按规则比对（选项字母、对错、文字），再用受限的算式求值器做数值比对（`ai/skills/answer_check/compare.py`，能判断 1/2 和 0.5、2(x+1) 和 2x+2 等价，不执行任意代码），判断不了的交给模型比对。
+- 2026-11 实测 DeepSeek 的 `deepseek-chat`、`deepseek-reasoner` 都由 `deepseek-flash` 提供，出题用的就是它；校验首选 `deepseek-v4-pro`，和出题模型不同，错误不容易重合（`models.yaml` 的 reasoning 档）。

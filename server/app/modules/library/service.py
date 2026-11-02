@@ -13,7 +13,7 @@ import anyio
 from sqlalchemy import ColumnElement, and_, func, or_, select
 from sqlalchemy.orm import Session
 
-from app.ai.gateway.gateway import CallContext, get_gateway
+from app.ai.gateway.gateway import AIGateway, CallContext, get_gateway
 from app.ai.parsing import SUPPORTED_EXTS
 from app.core import storage
 from app.core.config import get_settings
@@ -170,10 +170,14 @@ async def search(
     resource_ids: list[uuid.UUID] | None = None,
     subject: str | None = None,
     k: int = 6,
+    gateway: AIGateway | None = None,
 ) -> list[SearchHit]:
-    """在老师可见的资料里找和 query 最相关的片段。没有可检索的资料时不调用向量模型。"""
+    """在老师可见的资料里找和 query 最相关的片段。没有可检索的资料时不调用向量模型。
+
+    后台任务在自己的事件循环里运行，要传入自己的网关实例（见 gateway.build_gateway）。
+    """
     assert ctx.tenant_id is not None and ctx.user_id is not None
-    gateway = get_gateway()
+    gateway = gateway or get_gateway()
     model = gateway.embed_model(EMBED_SKILL)
     if model is None:
         return []
@@ -208,6 +212,15 @@ async def search(
     if hits and min_score:
         hits = [h for h in hits if h.score >= hits[0].score - MAX_GAP]
     return hits[:k]
+
+
+def hit_label(hit: SearchHit) -> str:
+    """引用时显示的出处，如：《有理数.pptx》第 3 页。"""
+    text = f"《{hit.filename}》"
+    if hit.page_start is not None:
+        same = hit.page_end in (None, hit.page_start)
+        text += f"第 {hit.page_start} 页" if same else f"第 {hit.page_start}～{hit.page_end} 页"
+    return text
 
 
 def _search_filters(

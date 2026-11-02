@@ -7,6 +7,8 @@ from app.modules.iam.models import Tenant, User
 from app.modules.library.models import Resource, ResourceChunk
 from app.modules.ops.models import AuditLog
 from app.modules.org.models import Campus, ClassMember, Klass
+from app.modules.qbank.models import Question, QuestionBatch, QuestionCheck
+from app.modules.recite.models import ReciteCard, ReciteDeck
 
 __all__ = [
     "AiUsage",
@@ -16,6 +18,11 @@ __all__ = [
     "ClassMember",
     "Document",
     "Klass",
+    "Question",
+    "QuestionBatch",
+    "QuestionCheck",
+    "ReciteCard",
+    "ReciteDeck",
     "Resource",
     "ResourceChunk",
     "Tenant",

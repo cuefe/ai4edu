@@ -147,6 +147,59 @@ def _append(parent: Node, node: Node) -> None:
     parent.setdefault("content", []).append(node)
 
 
+def doc_to_markdown(doc: Node) -> str:
+    """TipTap JSON → Markdown，给模型读老师改过的文档用（如从讲义抽背诵点）。只求内容完整，不求格式还原。"""
+    return "\n\n".join(b for b in (_block_md(n) for n in doc.get("content", [])) if b).strip()
+
+
+def _block_md(node: Node, indent: str = "") -> str:
+    kind = node.get("type")
+    children = node.get("content", [])
+    if kind == "heading":
+        return "#" * int(node.get("attrs", {}).get("level", 2)) + " " + _inline_md(children)
+    if kind == "paragraph":
+        return _inline_md(children)
+    if kind in ("bulletList", "orderedList"):
+        start = int(node.get("attrs", {}).get("start") or 1)
+        lines = []
+        for i, item in enumerate(children):
+            marker = f"{start + i}." if kind == "orderedList" else "-"
+            body = [_block_md(c, indent + "  ") for c in item.get("content", [])]
+            lines.append(f"{indent}{marker} " + f"\n{indent}  ".join(b for b in body if b))
+        return "\n".join(lines)
+    if kind == "blockquote":
+        return "\n".join(f"> {line}" for b in children for line in _block_md(b).splitlines())
+    if kind == "table":
+        rows = [
+            "| " + " | ".join(_block_md(c).replace("\n", " ") for c in row.get("content", [])) + " |"
+            for row in children
+        ]
+        return "\n".join(rows)
+    if kind == "tableHeader" or kind == "tableCell":
+        return " ".join(_block_md(c) for c in children)
+    if kind == "codeBlock":
+        return "```\n" + _inline_md(children) + "\n```"
+    if kind == "blockMath":
+        return f"$${node.get('attrs', {}).get('latex', '')}$$"
+    return ""
+
+
+def _inline_md(nodes: list[Node]) -> str:
+    out = []
+    for n in nodes:
+        kind = n.get("type")
+        if kind == "text":
+            text = n.get("text", "")
+            if any(m.get("type") == "bold" for m in n.get("marks", [])):
+                text = f"**{text}**"
+            out.append(text)
+        elif kind == "inlineMath":
+            out.append(f"${n.get('attrs', {}).get('latex', '')}$")
+        elif kind == "hardBreak":
+            out.append("\n")
+    return "".join(out)
+
+
 def _normalize(node: Node) -> None:
     """补齐编辑器 schema 要求的结构：列表项以段落开头，表格单元格、引用不能为空。"""
     children = node.get("content")

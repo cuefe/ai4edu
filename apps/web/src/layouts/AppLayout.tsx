@@ -2,6 +2,7 @@ import {
   ApartmentOutlined,
   BookOutlined,
   CloudServerOutlined,
+  CreditCardOutlined,
   DownOutlined,
   EditOutlined,
   FileTextOutlined,
@@ -11,6 +12,7 @@ import {
   MenuOutlined,
   ReadOutlined,
   RobotOutlined,
+  SnippetsOutlined,
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
@@ -56,17 +58,27 @@ export function AppLayout() {
     });
   }
   if (hasRole("teacher")) {
-    items.push({
-      type: "group",
-      label: "教学",
-      children: [
-        { key: "/teacher", icon: <HomeOutlined />, label: "我的班级" },
-        { key: "/teacher/lesson-plans", icon: <EditOutlined />, label: "AI 备课" },
-        { key: "/teacher/resources", icon: <FolderOpenOutlined />, label: "资料库" },
-        { key: "soon-qbank", icon: <BookOutlined />, label: <>题库{SOON}</>, disabled: true },
-        { key: "soon-homework", icon: <FileTextOutlined />, label: <>作业{SOON}</>, disabled: true },
-      ],
-    });
+    items.push(
+      {
+        type: "group",
+        label: "教学",
+        children: [
+          { key: "/teacher", icon: <HomeOutlined />, label: "我的班级" },
+          { key: "soon-homework", icon: <SnippetsOutlined />, label: <>作业{SOON}</>, disabled: true },
+        ],
+      },
+      {
+        type: "group",
+        label: "备课",
+        children: [
+          { key: "/teacher/lesson-plans", icon: <EditOutlined />, label: "教案" },
+          { key: "/teacher/handouts", icon: <FileTextOutlined />, label: "讲义" },
+          { key: "/teacher/recite", icon: <CreditCardOutlined />, label: "背诵卡片" },
+          { key: "/teacher/questions", icon: <BookOutlined />, label: "题库" },
+          { key: "/teacher/resources", icon: <FolderOpenOutlined />, label: "资料库" },
+        ],
+      },
+    );
   }
   if (hasRole("student")) {
     items.push({

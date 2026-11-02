@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, FileWordOutlined, ReloadOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, CreditCardOutlined, FileTextOutlined, FileWordOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import type { Editor } from "@tiptap/react";
 import { Alert, App, Button, Card, Input, Result, Space, Spin, Typography } from "antd";
@@ -8,14 +8,16 @@ import { useNavigate, useParams } from "react-router";
 import { ApiError, api, unwrap, type Schemas } from "@/api/client";
 import { DocEditor } from "@/components/DocEditor";
 import { MarkdownView } from "@/components/MarkdownView";
-import { exportDocx } from "./LessonPlansPage";
+import { exportDocx } from "./DocumentsPage";
+import { DOC_TYPES, docTypeOf, type DocType } from "./lessonPlanOptions";
 
 type DocumentOut = Schemas["DocumentOut"];
 type SaveState = "saved" | "dirty" | "saving" | "error";
 
 const AUTOSAVE_MS = 1500;
 
-export function LessonPlanEditPage() {
+/** 教案、讲义的编辑页。docType 只决定找不到文档时返回哪个列表，其余按文档自己的类型。 */
+export function DocumentEditPage({ docType }: { docType: DocType }) {
   const { id = "" } = useParams();
   const navigate = useNavigate();
   const query = useQuery({
@@ -26,21 +28,22 @@ export function LessonPlanEditPage() {
     refetchInterval: (q) => (q.state.data?.status === "generating" ? 2000 : false),
   });
   const doc = query.data;
+  const config = DOC_TYPES[doc ? docTypeOf(doc.doc_type) : docType];
 
   if (query.isLoading) return <Spin style={{ display: "block", marginTop: 96 }} />;
   if (!doc) {
     return (
       <Result
         status="404"
-        title={query.error?.message ?? "教案不存在"}
-        extra={<Button onClick={() => navigate("/teacher/lesson-plans")}>返回教案列表</Button>}
+        title={query.error?.message ?? `${config.label}不存在`}
+        extra={<Button onClick={() => navigate(config.base)}>返回{config.label}列表</Button>}
       />
     );
   }
   if (doc.status === "generating") {
     return (
       <Card title={doc.title}>
-        <Alert type="info" showIcon title="教案还在生成中，生成完会自动进入编辑" style={{ marginBottom: 16 }} />
+        <Alert type="info" showIcon title={`${config.label}还在生成中，生成完会自动进入编辑`} style={{ marginBottom: 16 }} />
         <MarkdownView text={doc.generated_md ?? ""} />
       </Card>
     );
@@ -49,20 +52,20 @@ export function LessonPlanEditPage() {
     return (
       <Result
         status="error"
-        title="教案生成失败"
+        title={`${config.label}生成失败`}
         subTitle={doc.error}
         extra={[
-          <Button key="retry" type="primary" onClick={() => navigate(`/teacher/lesson-plans/new?from=${doc.id}`)}>
+          <Button key="retry" type="primary" onClick={() => navigate(`${config.base}/new?from=${doc.id}`)}>
             重新生成
           </Button>,
-          <Button key="back" onClick={() => navigate("/teacher/lesson-plans")}>
-            返回教案列表
+          <Button key="back" onClick={() => navigate(config.base)}>
+            返回{config.label}列表
           </Button>,
         ]}
       />
     );
   }
-  return <LessonPlanEditor key={doc.id} doc={doc} />;
+  return <DocumentEditor key={doc.id} doc={doc} />;
 }
 
 function SaveStatus({ state, savedAt, onRetry }: { state: SaveState; savedAt: Date | null; onRetry: () => void }) {
@@ -78,8 +81,10 @@ function SaveStatus({ state, savedAt, onRetry }: { state: SaveState; savedAt: Da
   return <Typography.Text type="secondary">{savedAt ? `已保存 ${dayjs(savedAt).format("HH:mm:ss")}` : "已保存"}</Typography.Text>;
 }
 
-function LessonPlanEditor({ doc }: { doc: DocumentOut }) {
+function DocumentEditor({ doc }: { doc: DocumentOut }) {
   const navigate = useNavigate();
+  const docType = docTypeOf(doc.doc_type);
+  const config = DOC_TYPES[docType];
   const { message, modal } = App.useApp();
   const editorRef = useRef<Editor | null>(null);
   const [title, setTitle] = useState(doc.title);
@@ -108,7 +113,7 @@ function LessonPlanEditor({ doc }: { doc: DocumentOut }) {
         const out = unwrap(
           await api.PUT("/api/teacher/documents/{doc_id}", {
             params: { path: { doc_id: doc.id } },
-            body: { title: titleRef.current.trim() || "未命名教案", content: editor.getJSON(), version: version.current },
+            body: { title: titleRef.current.trim() || `未命名${config.label}`, content: editor.getJSON(), version: version.current },
           }),
         );
         version.current = out.version;
@@ -121,7 +126,7 @@ function LessonPlanEditor({ doc }: { doc: DocumentOut }) {
         if (e instanceof ApiError && e.code === "version_conflict") {
           conflict.current = true;
           modal.warning({
-            title: "教案已在别的窗口修改过",
+            title: `${config.label}已在别的窗口修改过`,
             content: "为了不覆盖那边的修改，这里不再自动保存。刷新页面可以看到最新内容。",
             okText: "刷新页面",
             onOk: () => window.location.reload(),
@@ -134,7 +139,7 @@ function LessonPlanEditor({ doc }: { doc: DocumentOut }) {
     })();
     inflight.current = run;
     return run;
-  }, [doc.id, modal]);
+  }, [doc.id, modal, config.label]);
 
   const saveRef = useRef(save);
   saveRef.current = save;
@@ -173,7 +178,7 @@ function LessonPlanEditor({ doc }: { doc: DocumentOut }) {
         message.error("保存失败，请稍后再导出");
         return;
       }
-      await exportDocx(doc.id, titleRef.current.trim() || "教案");
+      await exportDocx(doc.id, titleRef.current.trim() || config.label);
     } catch (e) {
       message.error(e instanceof Error ? e.message : "导出失败");
     } finally {
@@ -185,12 +190,12 @@ function LessonPlanEditor({ doc }: { doc: DocumentOut }) {
     <>
       <div className="page-head">
         <div style={{ display: "flex", alignItems: "center", gap: 4, flex: "1 1 320px", minWidth: 0 }}>
-          <Button type="text" icon={<ArrowLeftOutlined />} aria-label="返回教案列表" onClick={() => navigate("/teacher/lesson-plans")} />
+          <Button type="text" icon={<ArrowLeftOutlined />} aria-label={`返回${config.label}列表`} onClick={() => navigate(config.base)} />
           <Input
             value={title}
             variant="borderless"
             maxLength={200}
-            aria-label="教案标题"
+            aria-label={`${config.label}标题`}
             className="doc-title-input"
             onChange={(e) => {
               setTitle(e.target.value);
@@ -201,8 +206,22 @@ function LessonPlanEditor({ doc }: { doc: DocumentOut }) {
         </div>
         <Space wrap>
           <SaveStatus state={state} savedAt={savedAt} onRetry={() => void save()} />
-          <Button icon={<ReloadOutlined />} onClick={() => navigate(`/teacher/lesson-plans/new?from=${doc.id}`)}>
+          <Button icon={<ReloadOutlined />} onClick={() => navigate(`${config.base}/new?from=${doc.id}`)}>
             重新生成
+          </Button>
+          {docType === "lesson_plan" && (
+            <Button icon={<FileTextOutlined />} onClick={() => navigate(`/teacher/handouts/new?from=${doc.id}`)}>
+              生成学生讲义
+            </Button>
+          )}
+          <Button
+            icon={<CreditCardOutlined />}
+            onClick={async () => {
+              if (await save()) navigate(`/teacher/recite?from=${doc.id}`);
+              else message.error("保存失败，请稍后再试");
+            }}
+          >
+            抽取背诵点
           </Button>
           <Button type="primary" icon={<FileWordOutlined />} loading={exporting} onClick={exportWord}>
             导出 Word

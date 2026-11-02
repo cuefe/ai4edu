@@ -47,6 +47,11 @@ from app.modules.iam.models import Role, Tenant  # noqa: E402
 
 TABLES = ", ".join(
     [
+        "question_check",
+        "question",
+        "question_batch",
+        "recite_card",
+        "recite_deck",
         "resource_chunk",
         "resource_file",
         "document",

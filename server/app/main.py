@@ -10,6 +10,8 @@ from app.modules.iam.router import auth_router, me_router
 from app.modules.library.router import router as library_router
 from app.modules.ops.router import router as ops_router
 from app.modules.org.router import org_router, student_router, teacher_router
+from app.modules.qbank.router import router as qbank_router
+from app.modules.recite.router import router as recite_router
 
 DEV_DEFAULTS = {
     "jwt_secret": Settings.model_fields["jwt_secret"].default,
@@ -61,6 +63,8 @@ def create_app() -> FastAPI:
         teacher_router,
         student_router,
         content_router,
+        recite_router,
+        qbank_router,
         library_router,
         ops_router,
     ):

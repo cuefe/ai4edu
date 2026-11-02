@@ -24,7 +24,10 @@ tiers:
   standard: # 结构化抽取：背诵点、知识点标签
     - { provider: dashscope, model: qwen-plus }
     - { provider: deepseek, model: deepseek-chat }
-  reasoning: # 理科解题、答案校验（暂无备用）
+  # 理科解题、答案校验。2026-11 实测 deepseek-chat、deepseek-reasoner 都由 deepseek-flash 提供（后者开思考），
+  # 出题用的也是它；校验首选 v4-pro，和出题模型不同，错误不容易重合
+  reasoning:
+    - { provider: deepseek, model: deepseek-v4-pro }
     - { provider: deepseek, model: deepseek-reasoner }
   vision: # 拍照作答识别、主观题批改（暂无备用）
     - { provider: dashscope, model: qwen3-vl-plus }
@@ -43,7 +46,8 @@ skills:
   handout: flagship
   recite_cards: standard
   question_gen: flagship
-  answer_check: reasoning
+  answer_check: reasoning # 独立求解，核对题目答案
+  answer_judge: standard # 比对两个答案是否一致、说明分歧
   grade_subjective: vision
   tutor: fast
   safety_classify: fast

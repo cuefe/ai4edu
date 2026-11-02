@@ -5,20 +5,23 @@ import dayjs from "dayjs";
 import { Link, useNavigate } from "react-router";
 import { api, downloadFile, unwrap } from "@/api/client";
 import { PageHead } from "@/components/PageHead";
-import { STATUS_TAG } from "./lessonPlanOptions";
+import { DOC_TYPES, STATUS_TAG, type DocType } from "./lessonPlanOptions";
 
 export function exportDocx(id: string, title: string) {
   return downloadFile(`/api/teacher/documents/${id}/docx`, `${title}.docx`);
 }
 
-export function LessonPlansPage() {
+/** 教案、讲义列表。 */
+export function DocumentsPage({ docType }: { docType: DocType }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const { message } = App.useApp();
+  const config = DOC_TYPES[docType];
+  const queryKey = ["teacher", "documents", docType];
   const docs = useQuery({
-    queryKey: ["teacher", "documents"],
-    queryFn: async () => unwrap(await api.GET("/api/teacher/documents", { params: { query: { doc_type: "lesson_plan" } } })),
-    // 有教案在生成时定时刷新状态
+    queryKey,
+    queryFn: async () => unwrap(await api.GET("/api/teacher/documents", { params: { query: { doc_type: docType } } })),
+    // 有文档在生成时定时刷新状态
     refetchInterval: (q) => (q.state.data?.some((d) => d.status === "generating") ? 3000 : false),
   });
   const remove = useMutation({
@@ -26,31 +29,31 @@ export function LessonPlansPage() {
       unwrap(await api.DELETE("/api/teacher/documents/{doc_id}", { params: { path: { doc_id: id } } })),
     onSuccess: () => {
       message.success("已删除");
-      qc.invalidateQueries({ queryKey: ["teacher", "documents"] });
+      qc.invalidateQueries({ queryKey });
     },
     onError: (e) => message.error(e.message),
   });
 
   const create = (
-    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/teacher/lesson-plans/new")}>
-      AI 生成教案
+    <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate(`${config.base}/new`)}>
+      AI 生成{config.label}
     </Button>
   );
 
   return (
     <>
-      <PageHead title="教案" extra={create} />
+      <PageHead title={config.label} extra={create} />
       <Table
         rowKey="id"
         loading={docs.isLoading}
         dataSource={docs.data}
         scroll={{ x: 720 }}
-        locale={{ emptyText: <Empty description="还没有教案，点右上角让 AI 帮你写第一份" /> }}
+        locale={{ emptyText: <Empty description={`还没有${config.label}，点右上角让 AI 帮你写第一份`} /> }}
         columns={[
           {
-            title: "课题",
+            title: "标题",
             dataIndex: "title",
-            render: (title: string, d) => <Link to={`/teacher/lesson-plans/${d.id}`}>{title}</Link>,
+            render: (title: string, d) => <Link to={`${config.base}/${d.id}`}>{title}</Link>,
           },
           { title: "学科", dataIndex: "subject", width: 80 },
           { title: "年级", dataIndex: "grade", width: 120 },

@@ -4,6 +4,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.ai.skills.handout import HandoutIn
 from app.ai.skills.lesson_plan import LessonPlanIn
 
 
@@ -19,7 +20,7 @@ class DocumentBrief(BaseModel):
 
 
 class DocumentOut(DocumentBrief):
-    params: LessonPlanIn | None
+    params: LessonPlanIn | HandoutIn | None = Field(description="生成参数，按 doc_type 区分")
     content: dict[str, Any] | None
     generated_md: str | None = Field(description="只在生成中返回：已生成的部分")
     warnings: list[str]

@@ -1,12 +1,13 @@
 import uuid
-from dataclasses import dataclass
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-Subject = Literal["数学", "英语"]
-Grade = Literal["七年级上册", "七年级下册", "八年级上册", "八年级下册", "九年级上册", "九年级下册"]
+from app.ai.skills.common import Grade, Source, Subject
+
 LessonType = Literal["新授课", "复习课", "习题课", "讲评课"]
+
+__all__ = ["Grade", "LessonPlanIn", "LessonType", "Source", "Subject"]
 
 
 class LessonPlanIn(BaseModel):
@@ -24,11 +25,3 @@ class LessonPlanIn(BaseModel):
     resource_ids: list[uuid.UUID] = Field(
         default_factory=list, max_length=20, description="只在这些资料里检索；为空时检索整个资料库"
     )
-
-
-@dataclass
-class Source:
-    """资料库检索到的片段，在教案里按编号引用。"""
-
-    label: str  # 如：《有理数.pptx》第 3 页
-    text: str

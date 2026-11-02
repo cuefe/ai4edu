@@ -393,6 +393,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/teacher/handouts/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 生成学生讲义
+         * @description 以 Server-Sent Events 流式返回，事件依次为：
+         *     - `created`：`{"id": 文档 ID}`，文档已创建（状态为生成中）
+         *     - `sources`：`{"items": [{"n", "resource_id", "chunk_id", "label"}]}`，从资料库检索到的参考片段（没有就不发）
+         *     - `delta`：`{"text": 新生成的一段 Markdown}`，可能有很多个
+         *     - `done`：`{"id": 文档 ID, "warnings": [自动检查发现的问题]}`
+         *     - `error`：`{"message": 错误说明}`
+         *
+         *     老师中途断开连接，生成也会继续并保存。
+         */
+        post: operations["generate_handout_api_teacher_handouts_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/teacher/documents": {
         parameters: {
             query?: never;
@@ -440,6 +467,221 @@ export interface paths {
         get: operations["export_docx_api_teacher_documents__doc_id__docx_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/recite-decks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的背诵卡片组 */
+        get: operations["list_decks_api_teacher_recite_decks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/recite-decks/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 抽取背诵点
+         * @description 大约需要半分钟
+         */
+        post: operations["generate_api_teacher_recite_decks_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/recite-decks/{deck_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Deck */
+        get: operations["get_deck_api_teacher_recite_decks__deck_id__get"];
+        /** 保存卡片组（整组替换） */
+        put: operations["update_deck_api_teacher_recite_decks__deck_id__put"];
+        post?: never;
+        /** Delete Deck */
+        delete: operations["delete_deck_api_teacher_recite_decks__deck_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * AI 出题
+         * @description 出题和校验在后台进行，用返回的 ID 查询进度
+         */
+        post: operations["generate_api_teacher_questions_generate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/question-batches/{batch_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 出题进度和结果 */
+        get: operations["get_batch_api_teacher_question_batches__batch_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 题目列表 */
+        get: operations["list_questions_api_teacher_questions_get"];
+        put?: never;
+        /** 手动录题（直接入库） */
+        post: operations["create_question_api_teacher_questions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions/counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 各列表的题目数 */
+        get: operations["counts_api_teacher_questions_counts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions/bulk-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 批量通过或驳回 */
+        post: operations["bulk_review_api_teacher_questions_bulk_review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions/{qid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Question */
+        get: operations["get_question_api_teacher_questions__qid__get"];
+        /** 修改题目 */
+        put: operations["update_question_api_teacher_questions__qid__put"];
+        post?: never;
+        /** Delete Question */
+        delete: operations["delete_question_api_teacher_questions__qid__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions/{qid}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 审核通过，入库 */
+        post: operations["approve_api_teacher_questions__qid__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions/{qid}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 驳回 */
+        post: operations["reject_api_teacher_questions__qid__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/questions/{qid}/recheck": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 重新校验答案 */
+        post: operations["recheck_api_teacher_questions__qid__recheck_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -688,6 +930,40 @@ export interface components {
             /** Cost Yuan */
             cost_yuan: string | null;
         };
+        /** BatchOut */
+        BatchOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Topic */
+            topic: string;
+            /** @description 出题参数，“再出一批”时回填表单 */
+            params: components["schemas"]["QuestionGenIn"] | null;
+            /**
+             * Status
+             * @description generating 出题中 / checking 校验中 / done / failed
+             */
+            status: string;
+            /** Progress */
+            progress: number;
+            /** Error */
+            error: string | null;
+            /** Warnings */
+            warnings: string[];
+            /** Sources */
+            sources: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Questions */
+            questions: components["schemas"]["QuestionOut"][];
+        };
         /** Body_import_students_api_org_students_import_post */
         Body_import_students_api_org_students_import_post: {
             /** File */
@@ -705,6 +981,24 @@ export interface components {
              */
             shared: boolean;
         };
+        /** BulkReviewIn */
+        BulkReviewIn: {
+            /** Ids */
+            ids: string[];
+            /**
+             * Approve
+             * @default true
+             */
+            approve: boolean;
+        };
+        /** BulkReviewOut */
+        BulkReviewOut: {
+            /**
+             * Count
+             * @description 实际审核的道数（校验中的、别人的题会跳过）
+             */
+            count: number;
+        };
         /** CampusIn */
         CampusIn: {
             /** Name */
@@ -720,12 +1014,79 @@ export interface components {
             /** Name */
             name: string;
         };
+        /**
+         * Card
+         * @description 一张背诵卡片。
+         *
+         *     - qa（问答）：front 是问题，back 是答案
+         *     - cloze（挖空）：front 是一句话，要背的部分用 {{ }} 括起来；back 是补充说明，可以为空
+         */
+        Card: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "qa" | "cloze";
+            /** Front */
+            front: string;
+            /**
+             * Back
+             * @default
+             */
+            back: string;
+        };
+        /** CardOut */
+        CardOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "qa" | "cloze";
+            /** Front */
+            front: string;
+            /**
+             * Back
+             * @default
+             */
+            back: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** ChangePasswordIn */
         ChangePasswordIn: {
             /** Old Password */
             old_password: string;
             /** New Password */
             new_password: string;
+        };
+        /** CheckOut */
+        CheckOut: {
+            /**
+             * Verdict
+             * @description agree 一致 / disagree 不一致 / unsure 判断不了 / error 校验失败
+             */
+            verdict: string;
+            /**
+             * Method
+             * @description rule 规则比对 / numeric 数值比对 / judge 模型比对
+             */
+            method: string;
+            /** Solver Model */
+            solver_model: string | null;
+            /** Solver Answer */
+            solver_answer: string | null;
+            /** Solver Work */
+            solver_work: string;
+            /** Reason */
+            reason: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** ChunkOut */
         ChunkOut: {
@@ -793,11 +1154,81 @@ export interface components {
             /** Password */
             password: string;
         };
+        /** DeckBrief */
+        DeckBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string | null;
+            /** Grade */
+            grade: string | null;
+            /** Source Doc Id */
+            source_doc_id: string | null;
+            /** Card Count */
+            card_count: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** DeckOut */
+        DeckOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string | null;
+            /** Grade */
+            grade: string | null;
+            /** Source Doc Id */
+            source_doc_id: string | null;
+            /** Card Count */
+            card_count: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Cards */
+            cards: components["schemas"]["CardOut"][];
+            /**
+             * Warnings
+             * @description 生成时自动检查发现的问题
+             */
+            warnings: string[];
+        };
+        /** DeckUpdate */
+        DeckUpdate: {
+            /** Title */
+            title: string;
+            /** Cards */
+            cards: components["schemas"]["Card"][];
+        };
         /**
          * DocType
          * @enum {string}
          */
-        DocType: "lesson_plan";
+        DocType: "lesson_plan" | "handout";
         /** DocumentBrief */
         DocumentBrief: {
             /**
@@ -853,7 +1284,11 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            params: components["schemas"]["LessonPlanIn"] | null;
+            /**
+             * Params
+             * @description 生成参数，按 doc_type 区分
+             */
+            params: components["schemas"]["LessonPlanIn"] | components["schemas"]["HandoutIn"] | null;
             /** Content */
             content: {
                 [key: string]: unknown;
@@ -888,6 +1323,57 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HandoutIn */
+        HandoutIn: {
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "数学" | "英语";
+            /**
+             * Grade
+             * @enum {string}
+             */
+            grade: "七年级上册" | "七年级下册" | "八年级上册" | "八年级下册" | "九年级上册" | "九年级下册";
+            /**
+             * Textbook
+             * @default 人教版
+             */
+            textbook: string;
+            /**
+             * Topic
+             * @description 课题或复习范围，如：1.2 有理数、第一章 复习
+             */
+            topic: string;
+            /**
+             * Kind
+             * @description 课堂讲义：新课预习和课后巩固；复习讲义：考点总结
+             * @default 课堂讲义
+             * @enum {string}
+             */
+            kind: "课堂讲义" | "复习讲义";
+            /**
+             * Requirements
+             * @description 学情、侧重点等要求
+             */
+            requirements?: string | null;
+            /**
+             * Reference
+             * @description 参考资料：教材原文、教案等
+             */
+            reference?: string | null;
+            /**
+             * Use Library
+             * @description 从资料库里检索相关片段作为参考
+             * @default true
+             */
+            use_library: boolean;
+            /**
+             * Resource Ids
+             * @description 只在这些资料里检索；为空时检索整个资料库
+             */
+            resource_ids?: string[];
         };
         /** ImportResultOut */
         ImportResultOut: {
@@ -1013,6 +1499,228 @@ export interface components {
             phone: string;
             /** Password */
             password: string;
+        };
+        /** QuestionCounts */
+        QuestionCounts: {
+            /**
+             * Review
+             * @description 我的待审核
+             */
+            review: number;
+            /**
+             * Bank
+             * @description 机构题库（已入库）
+             */
+            bank: number;
+            /**
+             * Rejected
+             * @description 我驳回的
+             */
+            rejected: number;
+        };
+        /** QuestionGenIn */
+        QuestionGenIn: {
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "数学" | "英语";
+            /**
+             * Grade
+             * @enum {string}
+             */
+            grade: "七年级上册" | "七年级下册" | "八年级上册" | "八年级下册" | "九年级上册" | "九年级下册";
+            /**
+             * Textbook
+             * @default 人教版
+             */
+            textbook: string;
+            /**
+             * Topic
+             * @description 考查的知识点或课题，如：有理数的加法法则
+             */
+            topic: string;
+            /**
+             * Qtype
+             * @default 单选题
+             * @enum {string}
+             */
+            qtype: "单选题" | "多选题" | "判断题" | "填空题" | "解答题";
+            /**
+             * Difficulty
+             * @default 中等
+             * @enum {string}
+             */
+            difficulty: "容易" | "中等" | "较难";
+            /**
+             * Count
+             * @default 5
+             */
+            count: number;
+            /**
+             * Requirements
+             * @description 如：结合生活情境、考查易错点
+             */
+            requirements?: string | null;
+            /**
+             * Reference
+             * @description 参考题：AI 仿照风格和难度出题
+             */
+            reference?: string | null;
+            /**
+             * Use Library
+             * @description 从资料库里检索相关片段作为命题依据
+             * @default true
+             */
+            use_library: boolean;
+            /**
+             * Resource Ids
+             * @description 只在这些资料里检索；为空时检索整个资料库
+             */
+            resource_ids?: string[];
+        };
+        /**
+         * QuestionIn
+         * @description 老师手动录题或修改题目。
+         */
+        QuestionIn: {
+            /**
+             * Qtype
+             * @enum {string}
+             */
+            qtype: "单选题" | "多选题" | "判断题" | "填空题" | "解答题";
+            /** Stem */
+            stem: string;
+            /** Options */
+            options?: string[];
+            /** Answer */
+            answer: string;
+            /**
+             * Analysis
+             * @default
+             */
+            analysis: string;
+            /** Knowledge Points */
+            knowledge_points?: string[];
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "数学" | "英语";
+            /** Grade */
+            grade?: ("七年级上册" | "七年级下册" | "八年级上册" | "八年级下册" | "九年级上册" | "九年级下册") | null;
+            /**
+             * Difficulty
+             * @default 中等
+             * @enum {string}
+             */
+            difficulty: "容易" | "中等" | "较难";
+        };
+        /** QuestionOut */
+        QuestionOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Subject */
+            subject: string;
+            /** Grade */
+            grade: string | null;
+            /** Qtype */
+            qtype: string;
+            /** Difficulty */
+            difficulty: string;
+            /** Stem */
+            stem: string;
+            /** Options */
+            options: string[];
+            /** Answer */
+            answer: string;
+            /** Analysis */
+            analysis: string;
+            /** Knowledge Points */
+            knowledge_points: string[];
+            /**
+             * Source
+             * @description ai / manual
+             */
+            source: string;
+            /**
+             * Status
+             * @description checking 校验中 / checked、disputed、unchecked 待审核 / approved 已入库 / rejected 驳回
+             */
+            status: string;
+            /**
+             * Edited
+             * @description AI 出的题老师改过
+             */
+            edited: boolean;
+            /** Warnings */
+            warnings: string[];
+            /** Batch Id */
+            batch_id: string | null;
+            /** Owner Name */
+            owner_name: string;
+            /** Mine */
+            mine: boolean;
+            /** @description 最近一次答案校验 */
+            check: components["schemas"]["CheckOut"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** QuestionPage */
+        QuestionPage: {
+            /** Items */
+            items: components["schemas"]["QuestionOut"][];
+            /** Total */
+            total: number;
+        };
+        /** ReciteIn */
+        ReciteIn: {
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "数学" | "英语";
+            /**
+             * Grade
+             * @enum {string}
+             */
+            grade: "七年级上册" | "七年级下册" | "八年级上册" | "八年级下册" | "九年级上册" | "九年级下册";
+            /**
+             * Title
+             * @description 卡片组名称，如：1.2 有理数 必背知识点
+             */
+            title: string;
+            /**
+             * Doc Id
+             * @description 从这份讲义或教案里抽取
+             */
+            doc_id?: string | null;
+            /**
+             * Text
+             * @description 或者直接粘贴要整理的内容
+             */
+            text?: string | null;
+            /**
+             * Requirements
+             * @description 如：只要公式和定义
+             */
+            requirements?: string | null;
+            /**
+             * Max Cards
+             * @default 20
+             */
+            max_cards: number;
         };
         /** RefreshIn */
         RefreshIn: {
@@ -2087,6 +2795,39 @@ export interface operations {
             };
         };
     };
+    generate_handout_api_teacher_handouts_generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandoutIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_documents_api_teacher_documents_get: {
         parameters: {
             query?: {
@@ -2233,6 +2974,538 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_decks_api_teacher_recite_decks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckBrief"][];
+                };
+            };
+        };
+    };
+    generate_api_teacher_recite_decks_generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReciteIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_deck_api_teacher_recite_decks__deck_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deck_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_deck_api_teacher_recite_decks__deck_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deck_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeckUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_deck_api_teacher_recite_decks__deck_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                deck_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_api_teacher_questions_generate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionGenIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_batch_api_teacher_question_batches__batch_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_questions_api_teacher_questions_get: {
+        parameters: {
+            query?: {
+                /** @description review 我的待审核 / bank 机构题库 / rejected 我驳回的 */
+                view?: "review" | "bank" | "rejected";
+                subject?: string | null;
+                grade?: string | null;
+                qtype?: string | null;
+                difficulty?: string | null;
+                /** @description 搜题干和知识点 */
+                keyword?: string | null;
+                /** @description 题库里只看我出的 */
+                mine?: boolean;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_question_api_teacher_questions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    counts_api_teacher_questions_counts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionCounts"];
+                };
+            };
+        };
+    };
+    bulk_review_api_teacher_questions_bulk_review_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkReviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkReviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_question_api_teacher_questions__qid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_question_api_teacher_questions__qid__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_question_api_teacher_questions__qid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_api_teacher_questions__qid__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reject_api_teacher_questions__qid__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    recheck_api_teacher_questions__qid__recheck_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionOut"];
                 };
             };
             /** @description Validation Error */

@@ -166,6 +166,13 @@ body,
   border-radius: 4px;
 }
 
+/* 很长的独立公式在手机上单独横向滚动，不撑宽整个页面 */
+.doc-body [data-type="block-math"],
+.doc-body .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .doc-body [data-type="inline-math"]:hover,
 .doc-body [data-type="block-math"]:hover {
   background: #eef3ff;
@@ -189,6 +196,55 @@ body,
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* —— 题目、背诵卡片 —— */
+
+.q-card .doc-body {
+  font-size: 14px;
+}
+
+.q-disputed.ant-card {
+  border-color: #ffa39e;
+}
+
+.q-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 4px 16px;
+  margin: 6px 0;
+}
+
+.q-option {
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.q-correct {
+  background: #f6ffed;
+  color: #237804;
+}
+
+.q-answer {
+  margin-top: 6px;
+}
+
+.q-check {
+  margin-top: 8px;
+}
+
+.recite-card .doc-body {
+  font-size: 15px;
+}
+
+.recite-card .doc-body strong {
+  color: #2f6fed;
+}
+
+.recite-answer {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e5e6eb;
 }
 
 .math-preview {

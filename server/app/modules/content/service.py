@@ -7,12 +7,12 @@ from pydantic import ValidationError
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
-from app.ai.skills import lesson_plan
 from app.core.db import session_scope
 from app.core.errors import AppError, NotFound
 from app.modules.content.markdown import markdown_to_doc
-from app.modules.content.models import DocStatus, DocType, Document
+from app.modules.content.models import DocStatus, Document
 from app.modules.content.schemas import DocumentBrief, DocumentOut
+from app.modules.content.skills import DOC_SKILLS, DocInput
 
 # 生成中的文档每隔几秒写一次进度；超过这个时间没有进度，说明生成已中断（例如服务重启）
 STALE_AFTER = timedelta(minutes=2)
@@ -50,13 +50,22 @@ def get_document(db: Session, tenant_id: uuid.UUID, owner_id: uuid.UUID, doc_id:
     return doc
 
 
+def get_ready_document(db: Session, tenant_id: uuid.UUID, owner_id: uuid.UUID, doc_id: uuid.UUID) -> Document:
+    """取一份已生成好的文档，供其他功能读取正文（如抽背诵点）。正文用 markdown.doc_to_markdown 转。"""
+    doc = get_document(db, tenant_id, owner_id, doc_id)
+    if doc.status != DocStatus.READY or doc.content is None:
+        raise AppError("这份文档还没有生成完成")
+    return doc
+
+
 def to_brief(doc: Document) -> DocumentBrief:
     return DocumentBrief.model_validate(doc, from_attributes=True)
 
 
 def to_out(doc: Document) -> DocumentOut:
+    spec = DOC_SKILLS.get(doc.doc_type)
     try:
-        params = lesson_plan.LessonPlanIn.model_validate(doc.params) if doc.params else None
+        params = spec.input_type.model_validate(doc.params) if spec and doc.params else None
     except ValidationError:  # 参数结构改过，旧文档回填不了表单，不影响查看
         params = None
     return DocumentOut(
@@ -70,9 +79,11 @@ def to_out(doc: Document) -> DocumentOut:
     )
 
 
-def start_lesson_plan(
-    db: Session, tenant_id: uuid.UUID, owner_id: uuid.UUID, p: lesson_plan.LessonPlanIn
+def start_generation(
+    db: Session, tenant_id: uuid.UUID, owner_id: uuid.UUID, doc_type: str, p: DocInput
 ) -> Document:
+    """建一份"生成中"的文档。同一个老师同时在生成的文档有上限，防止误点多次。"""
+    spec = DOC_SKILLS[doc_type]
     generating = db.scalar(
         select(func.count())
         .select_from(Document)
@@ -85,18 +96,18 @@ def start_lesson_plan(
     )
     if generating >= MAX_GENERATING_PER_USER:
         raise AppError(
-            f"已有 {generating} 份教案正在生成，请等生成完再试", code="too_many_generating", status=429
+            f"已有 {generating} 份文档正在生成，请等生成完再试", code="too_many_generating", status=429
         )
     doc = Document(
         tenant_id=tenant_id,
         owner_id=owner_id,
-        doc_type=DocType.LESSON_PLAN,
+        doc_type=doc_type,
         title=p.topic,
         subject=p.subject,
         grade=p.grade,
         status=DocStatus.GENERATING,
         # mode="json"：resource_ids 是 UUID，原样存 JSONB 会序列化失败
-        params={**p.model_dump(mode="json"), "prompt_version": lesson_plan.PROMPT_VERSION},
+        params={**p.model_dump(mode="json"), "prompt_version": spec.prompt_version},
     )
     db.add(doc)
     db.flush()
@@ -105,7 +116,7 @@ def start_lesson_plan(
 
 def update_document(db: Session, doc: Document, title: str, content: dict[str, Any], version: int) -> None:
     if doc.status == DocStatus.GENERATING:
-        raise AppError("教案还在生成中，生成完才能编辑", code="generating", status=409)
+        raise AppError("文档还在生成中，生成完才能编辑", code="generating", status=409)
     if content.get("type") != "doc":
         raise AppError("文档格式不正确")
     if len(json.dumps(content, ensure_ascii=False).encode()) > MAX_CONTENT_BYTES:

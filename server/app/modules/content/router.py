@@ -10,6 +10,7 @@ from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.ai.gateway.gateway import CallContext
+from app.ai.skills.handout import HandoutIn
 from app.ai.skills.lesson_plan import LessonPlanIn
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
@@ -18,11 +19,13 @@ from app.modules.content import generation, service
 from app.modules.content.docx_export import doc_to_docx
 from app.modules.content.models import DocStatus, DocType
 from app.modules.content.schemas import DocumentBrief, DocumentOut, DocumentUpdate
+from app.modules.content.skills import DOC_SKILLS, DocInput
 from app.modules.iam.models import Role, User
 from app.modules.iam.schemas import OkOut
 from app.modules.ops.service import audit
 
 router = APIRouter(prefix="/teacher", tags=["备课"])
+# 教案、讲义共用 /documents 系列接口，按 doc_type 区分
 
 Teacher = Depends(require_roles(Role.TEACHER))
 
@@ -45,29 +48,49 @@ async def _stream(events: AsyncIterator[tuple[str, dict]]) -> AsyncIterator[str]
         yield _sse(name, data)
 
 
-@router.post(
-    "/lesson-plans/generate",
-    summary="AI 生成教案",
-    description=_SSE_DOC,
-    response_class=StreamingResponse,
-    responses={200: {"content": {"text/event-stream": {"schema": {"type": "string"}}}}},
-)
-async def generate_lesson_plan(body: LessonPlanIn, user: User = Teacher, db: Session = Depends(get_db)):
+async def _generate(doc_type: DocType, body: DocInput, user: User, db: Session) -> StreamingResponse:
     tenant_id = tenant_of(user)
 
     def create() -> uuid.UUID:
-        doc = service.start_lesson_plan(db, tenant_id, user.id, body)
+        doc = service.start_generation(db, tenant_id, user.id, doc_type, body)
         db.commit()
         return doc.id
 
     doc_id = await run_in_threadpool(create)
-    events = generation.start_lesson_plan(doc_id, CallContext(tenant_id=tenant_id, user_id=user.id), body)
+    events = generation.start(doc_type, doc_id, CallContext(tenant_id=tenant_id, user_id=user.id), body)
     return StreamingResponse(
         _stream(events),
         media_type="text/event-stream",
         # 关掉 Nginx 的响应缓冲，否则内容会攒够一批才发出去
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+_SSE_RESPONSES: dict[int | str, dict] = {
+    200: {"content": {"text/event-stream": {"schema": {"type": "string"}}}}
+}
+
+
+@router.post(
+    "/lesson-plans/generate",
+    summary="AI 生成教案",
+    description=_SSE_DOC,
+    response_class=StreamingResponse,
+    responses=_SSE_RESPONSES,
+)
+async def generate_lesson_plan(body: LessonPlanIn, user: User = Teacher, db: Session = Depends(get_db)):
+    return await _generate(DocType.LESSON_PLAN, body, user, db)
+
+
+@router.post(
+    "/handouts/generate",
+    summary="AI 生成学生讲义",
+    description=_SSE_DOC,
+    response_class=StreamingResponse,
+    responses=_SSE_RESPONSES,
+)
+async def generate_handout(body: HandoutIn, user: User = Teacher, db: Session = Depends(get_db)):
+    return await _generate(DocType.HANDOUT, body, user, db)
 
 
 @router.get("/documents", response_model=list[DocumentBrief], summary="我的文档")
@@ -125,7 +148,8 @@ def export_docx(doc_id: uuid.UUID, user: User = Teacher, db: Session = Depends(g
         target_id=doc.id,
     )
     db.commit()
-    filename = re.sub(r'[\\/:*?"<>|\s]+', "_", doc.title).strip("_")[:80] or "教案"
+    fallback = spec.label if (spec := DOC_SKILLS.get(doc.doc_type)) else "文档"
+    filename = re.sub(r'[\\/:*?"<>|\s]+', "_", doc.title).strip("_")[:80] or fallback
     return Response(
         content=data,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

@@ -45,6 +45,7 @@ class ChatResult:
     prompt_tokens: int
     completion_tokens: int
     latency_ms: int
+    reasoning: str = ""  # 推理模型的思考过程（reasoning_content），其他模型为空
 
 
 @dataclass
@@ -152,6 +153,7 @@ class AIGateway:
         candidates = self.candidates(skill)
         for c in candidates:
             started = time.monotonic()
+            reasoning = ""
             try:
                 if c is MOCK:
                     text = f"[mock:{skill}] {_last_user_text(messages)}"
@@ -164,6 +166,7 @@ class AIGateway:
                         model=c.model, messages=messages, **params
                     )
                     text = resp.choices[0].message.content or ""
+                    reasoning = getattr(resp.choices[0].message, "reasoning_content", None) or ""
                     pt = resp.usage.prompt_tokens if resp.usage else 0
                     ct = resp.usage.completion_tokens if resp.usage else 0
             except Exception as exc:
@@ -181,7 +184,7 @@ class AIGateway:
                 continue
             latency = int((time.monotonic() - started) * 1000)
             await self._record(UsageRecord(ctx, skill, c, pt, ct, latency))
-            return ChatResult(text, c.provider, c.model, pt, ct, latency)
+            return ChatResult(text, c.provider, c.model, pt, ct, latency, reasoning)
         raise AppError("AI 服务暂时不可用，请稍后再试", code="ai_unavailable", status=503)
 
     async def stream(

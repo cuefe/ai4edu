@@ -12,6 +12,7 @@ from app.core.db import Base, TimestampMixin, new_id
 
 class DocType(StrEnum):
     LESSON_PLAN = "lesson_plan"
+    HANDOUT = "handout"
 
 
 class DocStatus(StrEnum):
