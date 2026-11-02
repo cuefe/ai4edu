@@ -140,6 +140,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的站内信（最近 50 条） */
+        get: operations["list_notifications_api_me_notifications_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/me/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 标记已读 */
+        post: operations["mark_read_api_me_notifications_read_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/org/campuses": {
         parameters: {
             query?: never;
@@ -793,6 +827,545 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/teacher/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我布置的作业 */
+        get: operations["list_assignments_api_teacher_assignments_get"];
+        put?: never;
+        /** 布置作业 */
+        post: operations["create_assignment_api_teacher_assignments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/assignments/{aid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 作业报告 */
+        get: operations["get_assignment_api_teacher_assignments__aid__get"];
+        put?: never;
+        post?: never;
+        /** Delete Assignment */
+        delete: operations["delete_assignment_api_teacher_assignments__aid__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/assignments/{aid}/remind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 一键催交 */
+        post: operations["remind_api_teacher_assignments__aid__remind_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/assignments/{aid}/grading": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 待确认的批改 */
+        get: operations["grading_api_teacher_assignments__aid__grading_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/assignments/{aid}/confirm-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** AI 已批改的全部按 AI 给分确认 */
+        post: operations["confirm_all_api_teacher_assignments__aid__confirm_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/assignments/{aid}/submissions/{sid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 某个学生的作答 */
+        get: operations["submission_detail_api_teacher_assignments__aid__submissions__sid__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/answers/{answer_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 确认或修改得分 */
+        post: operations["confirm_api_teacher_answers__answer_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/answers/{answer_id}/images/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 学生拍照作答的图片 */
+        get: operations["teacher_image_api_teacher_answers__answer_id__images__index__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的作业 */
+        get: operations["my_assignments_api_student_assignments_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/assignments/{aid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Assignment */
+        get: operations["my_assignment_api_student_assignments__aid__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/assignments/{aid}/answers/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 保存作答（自动保存） */
+        put: operations["save_answer_api_student_assignments__aid__answers__item_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/assignments/{aid}/answers/{item_id}/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 拍照作答：上传一张照片 */
+        post: operations["upload_image_api_student_assignments__aid__answers__item_id__images_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/assignments/{aid}/answers/{item_id}/images/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我上传的照片 */
+        get: operations["my_image_api_student_assignments__aid__answers__item_id__images__index__get"];
+        put?: never;
+        post?: never;
+        /** Delete Image */
+        delete: operations["delete_image_api_student_assignments__aid__answers__item_id__images__index__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/assignments/{aid}/items/{item_id}/done": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 讲义读完、背诵完成 */
+        post: operations["mark_done_api_student_assignments__aid__items__item_id__done_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/assignments/{aid}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 提交作业 */
+        post: operations["submit_api_student_assignments__aid__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/wrong-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 错题本 */
+        get: operations["wrong_book_api_student_wrong_items_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/wrong-items/{wid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Wrong Item */
+        get: operations["wrong_item_api_student_wrong_items__wid__get"];
+        put?: never;
+        post?: never;
+        /** 从错题本移除 */
+        delete: operations["remove_api_student_wrong_items__wid__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/wrong-items/{wid}/redo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 订正：重做 */
+        post: operations["redo_api_student_wrong_items__wid__redo_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/wrong-items/{wid}/self-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 订正：对照答案后自己判断做对没有 */
+        post: operations["self_check_api_student_wrong_items__wid__self_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/wrong-items/{wid}/guide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 订正：四步引导（AI 生成，生成过的直接返回） */
+        post: operations["guide_api_student_wrong_items__wid__guide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/review/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 今日背诵：到期复习的和新学的卡片 */
+        get: operations["review_today_api_student_review_today_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/review/{item_id}/{card_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 背完一张卡：自评记忆程度 */
+        post: operations["rate_api_student_review__item_id___card_key__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/tutor/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 现在能不能用问一问 */
+        get: operations["status_api_student_tutor_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/tutor/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 最近的提问 */
+        get: operations["list_sessions_api_student_tutor_sessions_get"];
+        put?: never;
+        /** 开始一次提问（可以关联作业题或错题） */
+        post: operations["create_session_api_student_tutor_sessions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/tutor/sessions/{sid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Session */
+        get: operations["get_session_api_student_tutor_sessions__sid__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/tutor/images": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 拍照提问：先上传图片 */
+        post: operations["upload_image_api_student_tutor_images_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/tutor/messages/{mid}/images/{index}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 消息里的图片 */
+        get: operations["message_image_api_student_tutor_messages__mid__images__index__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/tutor/sessions/{sid}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * 发消息
+         * @description 以 Server-Sent Events 流式返回：
+         *     - `notice`：`{"kind": "crisis", "hotlines": [...]}`，学生流露危机信号时先发，前端醒目显示求助电话
+         *     - `delta`：`{"text": 回复片段}`
+         *     - `done`：`{"id": 回复的消息 ID, "flag": 安全标记}`
+         *     - `error`：`{"message": 错误说明}`
+         */
+        post: operations["send_api_student_tutor_sessions__sid__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 心理预警（老师看自己班的，机构管理员看全部） */
+        get: operations["list_alerts_api_alerts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alerts/{alert_id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 预警前后的对话，了解情况用 */
+        get: operations["alert_messages_api_alerts__alert_id__messages_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/alerts/{alert_id}/handle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 确认处理并填写记录 */
+        post: operations["handle_api_alerts__alert_id__handle_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ops/tenants": {
         parameters: {
             query?: never;
@@ -930,6 +1503,220 @@ export interface components {
             /** Cost Yuan */
             cost_yuan: string | null;
         };
+        /** AlertOut */
+        AlertOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Student Id
+             * Format: uuid
+             */
+            student_id: string;
+            /** Student Name */
+            student_name: string;
+            /** Class Names */
+            class_names: string[];
+            /** Level */
+            level: string;
+            /** Excerpt */
+            excerpt: string;
+            /** Reason */
+            reason: string;
+            /** Status */
+            status: string;
+            /** Overdue */
+            overdue: boolean;
+            /** Session Id */
+            session_id: string | null;
+            /** Handled By Name */
+            handled_by_name: string | null;
+            /** Handled At */
+            handled_at: string | null;
+            /** Note */
+            note: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AnswerOut */
+        AnswerOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Item Id
+             * Format: uuid
+             */
+            item_id: string;
+            /** Response */
+            response: string;
+            /** Image Count */
+            image_count: number;
+            /** Status */
+            status: string;
+            /** Correct */
+            correct: boolean | null;
+            /** Score */
+            score: number | null;
+            /** Ai Score */
+            ai_score: number | null;
+            /** Ai Confidence */
+            ai_confidence: number | null;
+            /** Ai Comment */
+            ai_comment: string;
+            /** Ai Points */
+            ai_points: string[];
+            /** Teacher Comment */
+            teacher_comment: string;
+        };
+        /**
+         * AnswerRelease
+         * @enum {string}
+         */
+        AnswerRelease: "submit" | "due";
+        /** AssignmentBrief */
+        AssignmentBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string;
+            /** Class Names */
+            class_names: string[];
+            /**
+             * Publish At
+             * Format: date-time
+             */
+            publish_at: string;
+            /** Due At */
+            due_at: string | null;
+            /** Answer Release */
+            answer_release: string;
+            /** Allow Ai */
+            allow_ai: boolean;
+            /** Total Score */
+            total_score: number;
+            /** Student Count */
+            student_count: number;
+            /** Submitted Count */
+            submitted_count: number;
+            /**
+             * Pending Review
+             * @description 等老师确认的题数
+             */
+            pending_review: number;
+            /** Avg Score */
+            avg_score: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** AssignmentIn */
+        AssignmentIn: {
+            /** Title */
+            title: string;
+            /**
+             * Subject
+             * @enum {string}
+             */
+            subject: "数学" | "英语";
+            /**
+             * Note
+             * @description 给学生的要求
+             * @default
+             */
+            note: string;
+            /** Class Ids */
+            class_ids?: string[];
+            /**
+             * Student Ids
+             * @description 另外单独布置给的学生
+             */
+            student_ids?: string[];
+            /**
+             * Publish At
+             * @description 为空表示马上发布
+             */
+            publish_at?: string | null;
+            /** Due At */
+            due_at?: string | null;
+            /** @default submit */
+            answer_release: components["schemas"]["AnswerRelease"];
+            /**
+             * Allow Ai
+             * @description 作业期间允许问 AI（只给提示，不给答案）
+             * @default true
+             */
+            allow_ai: boolean;
+            /** Items */
+            items: components["schemas"]["ItemIn"][];
+        };
+        /** AssignmentReport */
+        AssignmentReport: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string;
+            /** Class Names */
+            class_names: string[];
+            /**
+             * Publish At
+             * Format: date-time
+             */
+            publish_at: string;
+            /** Due At */
+            due_at: string | null;
+            /** Answer Release */
+            answer_release: string;
+            /** Allow Ai */
+            allow_ai: boolean;
+            /** Total Score */
+            total_score: number;
+            /** Student Count */
+            student_count: number;
+            /** Submitted Count */
+            submitted_count: number;
+            /**
+             * Pending Review
+             * @description 等老师确认的题数
+             */
+            pending_review: number;
+            /** Avg Score */
+            avg_score: number | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Note */
+            note: string;
+            /** Items */
+            items: components["schemas"]["ItemOut"][];
+            /** Graded Count */
+            graded_count: number;
+            /** Item Stats */
+            item_stats: components["schemas"]["ItemStat"][];
+            /** Submissions */
+            submissions: components["schemas"]["SubmissionRow"][];
+        };
         /** BatchOut */
         BatchOut: {
             /**
@@ -980,6 +1767,16 @@ export interface components {
              * @default false
              */
             shared: boolean;
+        };
+        /** Body_upload_image_api_student_assignments__aid__answers__item_id__images_post */
+        Body_upload_image_api_student_assignments__aid__answers__item_id__images_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_upload_image_api_student_tutor_images_post */
+        Body_upload_image_api_student_tutor_images_post: {
+            /** File */
+            file: string;
         };
         /** BulkReviewIn */
         BulkReviewIn: {
@@ -1143,6 +1940,24 @@ export interface components {
             /** Campus Id */
             campus_id?: string | null;
         };
+        /** ConfirmIn */
+        ConfirmIn: {
+            /**
+             * Score
+             * @description 为空表示采用 AI 给的分
+             */
+            score?: number | null;
+            /** Comment */
+            comment?: string | null;
+        };
+        /** CountOut */
+        CountOut: {
+            /**
+             * Count
+             * @description 处理了几条
+             */
+            count: number;
+        };
         /** Credential */
         Credential: {
             /** Name */
@@ -1216,6 +2031,29 @@ export interface components {
              * @description 生成时自动检查发现的问题
              */
             warnings: string[];
+        };
+        /** DeckProgress */
+        DeckProgress: {
+            /**
+             * Item Id
+             * Format: uuid
+             */
+            item_id: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string;
+            /** Total */
+            total: number;
+            /** Learned */
+            learned: number;
+            /** Due */
+            due: number;
         };
         /** DeckUpdate */
         DeckUpdate: {
@@ -1319,10 +2157,72 @@ export interface components {
              */
             version: number;
         };
+        /** GradingRow */
+        GradingRow: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Item Id
+             * Format: uuid
+             */
+            item_id: string;
+            /** Response */
+            response: string;
+            /** Image Count */
+            image_count: number;
+            /** Status */
+            status: string;
+            /** Correct */
+            correct: boolean | null;
+            /** Score */
+            score: number | null;
+            /** Ai Score */
+            ai_score: number | null;
+            /** Ai Confidence */
+            ai_confidence: number | null;
+            /** Ai Comment */
+            ai_comment: string;
+            /** Ai Points */
+            ai_points: string[];
+            /** Teacher Comment */
+            teacher_comment: string;
+            /** Student Name */
+            student_name: string;
+            /** Item Seq */
+            item_seq: number;
+            /** Item Score */
+            item_score: number;
+            /** Question */
+            question: {
+                [key: string]: unknown;
+            };
+        };
+        /** GuideOut */
+        GuideOut: {
+            /** Analysis */
+            analysis: string;
+            /** Knowledge */
+            knowledge: string;
+            /** Steps */
+            steps: string[];
+            /** Summary */
+            summary: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** HandleIn */
+        HandleIn: {
+            /**
+             * Note
+             * @description 处理记录：和学生、家长沟通的情况，后续安排
+             */
+            note: string;
         };
         /** HandoutIn */
         HandoutIn: {
@@ -1375,6 +2275,11 @@ export interface components {
              */
             resource_ids?: string[];
         };
+        /** ImageOut */
+        ImageOut: {
+            /** Key */
+            key: string;
+        };
         /** ImportResultOut */
         ImportResultOut: {
             /** Created */
@@ -1386,6 +2291,74 @@ export interface components {
             /** Credentials */
             credentials: components["schemas"]["Credential"][];
         };
+        /** ItemIn */
+        ItemIn: {
+            item_type: components["schemas"]["ItemType"];
+            /**
+             * Ref Id
+             * Format: uuid
+             * @description 题目、讲义或卡片组的 ID
+             */
+            ref_id: string;
+            /**
+             * Score
+             * @description 题目分值，0 表示用默认分值；阅读、背诵不计分
+             * @default 0
+             */
+            score: number;
+        };
+        /** ItemOut */
+        ItemOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Seq */
+            seq: number;
+            /** Item Type */
+            item_type: string;
+            /** Score */
+            score: number;
+            /**
+             * Content
+             * @description 快照；学生端在答案公布前不含 answer、analysis
+             */
+            content: {
+                [key: string]: unknown;
+            };
+        };
+        /** ItemStat */
+        ItemStat: {
+            /**
+             * Item Id
+             * Format: uuid
+             */
+            item_id: string;
+            /** Seq */
+            seq: number;
+            /** Answered */
+            answered: number;
+            /** Correct */
+            correct: number;
+            /** Avg Score */
+            avg_score: number | null;
+            /**
+             * Accuracy
+             * @description 得满分的比例
+             */
+            accuracy: number | null;
+            /**
+             * Common Wrong
+             * @description 共性错题：错误率达到阈值
+             */
+            common_wrong: boolean;
+        };
+        /**
+         * ItemType
+         * @enum {string}
+         */
+        ItemType: "question" | "document" | "recite";
         /** LessonPlanIn */
         LessonPlanIn: {
             /**
@@ -1485,6 +2458,77 @@ export interface components {
          * @enum {string}
          */
         MemberRole: "teacher" | "student";
+        /** MessageIn */
+        MessageIn: {
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+            /**
+             * Style
+             * @description 讲解方式：讲简单点 / 举例子 / 编口诀
+             */
+            style?: ("simpler" | "example" | "mnemonic") | null;
+            /**
+             * Images
+             * @description 先上传图片拿到的 key
+             */
+            images?: string[];
+        };
+        /** MessageOut */
+        MessageOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Role */
+            role: string;
+            /** Content */
+            content: string;
+            /** Image Count */
+            image_count: number;
+            /** Style */
+            style: string | null;
+            /** Flag */
+            flag: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** NotificationList */
+        NotificationList: {
+            /** Items */
+            items: components["schemas"]["NotificationOut"][];
+            /** Unread */
+            unread: number;
+        };
+        /** NotificationOut */
+        NotificationOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Title */
+            title: string;
+            /** Body */
+            body: string;
+            /** Link */
+            link: string | null;
+            /** Read */
+            read: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /** OkOut */
         OkOut: {
             /**
@@ -1684,6 +2728,33 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** RateIn */
+        RateIn: {
+            /**
+             * Rating
+             * @description 1 忘了 / 2 模糊 / 3 记得 / 4 很熟
+             */
+            rating: number;
+            /** Duration Ms */
+            duration_ms?: number | null;
+        };
+        /** RateOut */
+        RateOut: {
+            /**
+             * Due
+             * Format: date-time
+             * @description 下次复习时间
+             */
+            due: string;
+        };
+        /** ReadIn */
+        ReadIn: {
+            /**
+             * Ids
+             * @description 为空表示全部已读
+             */
+            ids?: string[];
+        };
         /** ReciteIn */
         ReciteIn: {
             /**
@@ -1721,6 +2792,20 @@ export interface components {
              * @default 20
              */
             max_cards: number;
+        };
+        /** RedoIn */
+        RedoIn: {
+            /** Response */
+            response: string;
+        };
+        /** RedoOut */
+        RedoOut: {
+            /**
+             * Correct
+             * @description 为空表示要对照答案自己判断（解答题等）
+             */
+            correct: boolean | null;
+            item: components["schemas"]["WrongItemOut"];
         };
         /** RefreshIn */
         RefreshIn: {
@@ -1787,6 +2872,45 @@ export interface components {
             /** Shared */
             shared?: boolean | null;
         };
+        /** ResponseIn */
+        ResponseIn: {
+            /** Response */
+            response: string;
+        };
+        /** ReviewCard */
+        ReviewCard: {
+            /**
+             * Item Id
+             * Format: uuid
+             */
+            item_id: string;
+            /** Card Key */
+            card_key: number;
+            /** Deck Title */
+            deck_title: string;
+            /** Kind */
+            kind: string;
+            /** Front */
+            front: string;
+            /** Back */
+            back: string;
+            /** New */
+            new: boolean;
+        };
+        /** ReviewToday */
+        ReviewToday: {
+            /**
+             * Cards
+             * @description 今天要复习的卡片：先到期的旧卡片，再新卡片
+             */
+            cards: components["schemas"]["ReviewCard"][];
+            /** Due Count */
+            due_count: number;
+            /** New Count */
+            new_count: number;
+            /** Decks */
+            decks: components["schemas"]["DeckProgress"][];
+        };
         /** RowError */
         RowError: {
             /** Row */
@@ -1839,6 +2963,101 @@ export interface components {
              */
             k: number;
         };
+        /** SelfCheckIn */
+        SelfCheckIn: {
+            /** Correct */
+            correct: boolean;
+        };
+        /** SessionDetail */
+        SessionDetail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Mode */
+            mode: string;
+            /** Subject */
+            subject: string;
+            /** Title */
+            title: string;
+            /**
+             * Question
+             * @description 关联的题目（作业提示模式下不含答案）
+             */
+            question: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Messages */
+            messages: components["schemas"]["MessageOut"][];
+            /**
+             * Hotlines
+             * @description 求助电话，危机回复里显示
+             */
+            hotlines: string[];
+        };
+        /** SessionIn */
+        SessionIn: {
+            /**
+             * Mode
+             * @default learn
+             * @enum {string}
+             */
+            mode: "learn" | "homework" | "correction";
+            /**
+             * Assignment Id
+             * @description 问作业里的某道题时填
+             */
+            assignment_id?: string | null;
+            /** Item Id */
+            item_id?: string | null;
+            /**
+             * Wrong Item Id
+             * @description 订正错题时填
+             */
+            wrong_item_id?: string | null;
+        };
+        /** SessionOut */
+        SessionOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Mode */
+            mode: string;
+            /** Subject */
+            subject: string;
+            /** Title */
+            title: string;
+            /**
+             * Question
+             * @description 关联的题目（作业提示模式下不含答案）
+             */
+            question: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** SmsLoginIn */
         SmsLoginIn: {
             /** Phone */
@@ -1850,6 +3069,114 @@ export interface components {
         SmsSendIn: {
             /** Phone */
             phone: string;
+        };
+        /** StatusOut */
+        StatusOut: {
+            /** Blocked By */
+            blocked_by?: string | null;
+        };
+        /** StudentAssignment */
+        StudentAssignment: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string;
+            /** Teacher Name */
+            teacher_name: string;
+            /**
+             * Publish At
+             * Format: date-time
+             */
+            publish_at: string;
+            /** Due At */
+            due_at: string | null;
+            /** Status */
+            status: string;
+            /** Score */
+            score: number | null;
+            /** Total Score */
+            total_score: number;
+            /** Question Count */
+            question_count: number;
+            /**
+             * Task Count
+             * @description 阅读、背诵项数
+             */
+            task_count: number;
+            /** Progress Done */
+            progress_done: number;
+            /** Note */
+            note: string;
+            /** Allow Ai */
+            allow_ai: boolean;
+            /**
+             * Revealed
+             * @description 答案和解析是否已公布
+             */
+            revealed: boolean;
+            /** Submitted At */
+            submitted_at: string | null;
+            /** Pending Count */
+            pending_count: number;
+            /** Items */
+            items: components["schemas"]["ItemOut"][];
+            /** Answers */
+            answers: components["schemas"]["AnswerOut"][];
+            /**
+             * Recite Progress
+             * @description 背诵项学过的卡片数：{item_id: 张数}
+             */
+            recite_progress: {
+                [key: string]: number;
+            };
+            /**
+             * Progress
+             * @description 阅读、背诵项是否完成：{item_id: true}
+             */
+            progress: {
+                [key: string]: boolean;
+            };
+        };
+        /** StudentAssignmentBrief */
+        StudentAssignmentBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Title */
+            title: string;
+            /** Subject */
+            subject: string;
+            /** Teacher Name */
+            teacher_name: string;
+            /**
+             * Publish At
+             * Format: date-time
+             */
+            publish_at: string;
+            /** Due At */
+            due_at: string | null;
+            /** Status */
+            status: string;
+            /** Score */
+            score: number | null;
+            /** Total Score */
+            total_score: number;
+            /** Question Count */
+            question_count: number;
+            /**
+             * Task Count
+             * @description 阅读、背诵项数
+             */
+            task_count: number;
+            /** Progress Done */
+            progress_done: number;
         };
         /** StudentCreatedOut */
         StudentCreatedOut: {
@@ -1876,6 +3203,49 @@ export interface components {
             username: string;
             /** Password */
             password: string;
+        };
+        /**
+         * SubmissionDetail
+         * @description 老师查看某个学生的作答。
+         */
+        SubmissionDetail: {
+            submission: components["schemas"]["SubmissionRow"];
+            /** Answers */
+            answers: components["schemas"]["AnswerOut"][];
+        };
+        /** SubmissionRow */
+        SubmissionRow: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Student Id
+             * Format: uuid
+             */
+            student_id: string;
+            /** Student Name */
+            student_name: string;
+            /** Username */
+            username: string | null;
+            /** Class Name */
+            class_name: string | null;
+            /** Status */
+            status: string;
+            /** Submitted At */
+            submitted_at: string | null;
+            /** Late */
+            late: boolean;
+            /** Score */
+            score: number | null;
+            /** Pending Count */
+            pending_count: number;
+            /**
+             * Progress Done
+             * @description 完成的阅读、背诵项数
+             */
+            progress_done: number;
         };
         /** TeacherIn */
         TeacherIn: {
@@ -1989,6 +3359,56 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** WrongBook */
+        WrongBook: {
+            /** Items */
+            items: components["schemas"]["WrongItemOut"][];
+            /** Pending */
+            pending: number;
+            /** Corrected */
+            corrected: number;
+            /**
+             * Knowledge Points
+             * @description 错题涉及的知识点，用来筛选
+             */
+            knowledge_points: string[];
+        };
+        /** WrongItemOut */
+        WrongItemOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Subject */
+            subject: string;
+            /** Assignment Title */
+            assignment_title: string;
+            /**
+             * Question
+             * @description 题目快照，含答案和解析（前端订正时先隐藏）
+             */
+            question: {
+                [key: string]: unknown;
+            };
+            /** Wrong Response */
+            wrong_response: string;
+            /** Status */
+            status: string;
+            /** Wrong Count */
+            wrong_count: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Corrected At */
+            corrected_at: string | null;
+            /** Guide */
+            guide: {
+                [key: string]: unknown;
+            } | null;
         };
     };
     responses: never;
@@ -2226,6 +3646,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TokenOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_notifications_api_me_notifications_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationList"];
+                };
+            };
+        };
+    };
+    mark_read_api_me_notifications_read_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
                 };
             };
             /** @description Validation Error */
@@ -3782,6 +5255,1129 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_assignments_api_teacher_assignments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentBrief"][];
+                };
+            };
+        };
+    };
+    create_assignment_api_teacher_assignments_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentBrief"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_assignment_api_teacher_assignments__aid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_assignment_api_teacher_assignments__aid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remind_api_teacher_assignments__aid__remind_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    grading_api_teacher_assignments__aid__grading_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradingRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_all_api_teacher_assignments__aid__confirm_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submission_detail_api_teacher_assignments__aid__submissions__sid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+                sid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_api_teacher_answers__answer_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                answer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    teacher_image_api_teacher_answers__answer_id__images__index__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                answer_id: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_assignments_api_student_assignments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAssignmentBrief"][];
+                };
+            };
+        };
+    };
+    my_assignment_api_student_assignments__aid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAssignment"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_answer_api_student_assignments__aid__answers__item_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResponseIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_image_api_student_assignments__aid__answers__item_id__images_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_image_api_student_assignments__aid__answers__item_id__images_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_image_api_student_assignments__aid__answers__item_id__images__index__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+                item_id: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_image_api_student_assignments__aid__answers__item_id__images__index__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+                item_id: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnswerOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mark_done_api_student_assignments__aid__items__item_id__done_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_api_student_assignments__aid__submit_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                aid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAssignment"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    wrong_book_api_student_wrong_items_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                subject?: string | null;
+                knowledge_point?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WrongBook"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    wrong_item_api_student_wrong_items__wid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                wid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WrongItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    remove_api_student_wrong_items__wid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                wid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    redo_api_student_wrong_items__wid__redo_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                wid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RedoIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RedoOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    self_check_api_student_wrong_items__wid__self_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                wid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelfCheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WrongItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    guide_api_student_wrong_items__wid__guide_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                wid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuideOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_today_api_student_review_today_get: {
+        parameters: {
+            query?: {
+                item_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewToday"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rate_api_student_review__item_id___card_key__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                item_id: string;
+                card_key: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RateOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    status_api_student_tutor_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StatusOut"];
+                };
+            };
+        };
+    };
+    list_sessions_api_student_tutor_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionOut"][];
+                };
+            };
+        };
+    };
+    create_session_api_student_tutor_sessions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_session_api_student_tutor_sessions__sid__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_image_api_student_tutor_images_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_image_api_student_tutor_images_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImageOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    message_image_api_student_tutor_messages__mid__images__index__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mid: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_api_student_tutor_sessions__sid__messages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": string;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_alerts_api_alerts_get: {
+        parameters: {
+            query?: {
+                status?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    alert_messages_api_alerts__alert_id__messages_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alert_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    handle_api_alerts__alert_id__handle_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                alert_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HandleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertOut"];
                 };
             };
             /** @description Validation Error */

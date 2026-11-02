@@ -47,6 +47,18 @@ from app.modules.iam.models import Role, Tenant  # noqa: E402
 
 TABLES = ", ".join(
     [
+        "review_log",
+        "review_state",
+        "wrong_item",
+        "answer",
+        "submission",
+        "assignment_item",
+        "assignment",
+        "chat_message",
+        "chat_session",
+        "crisis_alert",
+        "moderation_log",
+        "notification",
         "question_check",
         "question",
         "question_batch",

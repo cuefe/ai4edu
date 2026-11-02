@@ -15,12 +15,19 @@ MAX_VERIFY_ATTEMPTS = 5
 class SmsSender(Protocol):
     def send_code(self, phone: str, code: str) -> None: ...
 
+    def send_notice(self, phone: str, text: str) -> None:
+        """通知短信（如危机预警提醒老师登录处理）。正文不放学生的具体内容。"""
+        ...
+
 
 class ConsoleSmsSender:
-    """开发环境：验证码打印到服务端日志。"""
+    """开发环境：短信打印到服务端日志。"""
 
     def send_code(self, phone: str, code: str) -> None:
         log.warning("【开发环境短信】发送到 %s 的验证码：%s", mask_phone(phone), code)
+
+    def send_notice(self, phone: str, text: str) -> None:
+        log.warning("【开发环境短信】发送到 %s 的通知：%s", mask_phone(phone), text)
 
 
 def get_sms_sender() -> SmsSender:

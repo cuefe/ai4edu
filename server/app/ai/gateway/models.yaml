@@ -49,7 +49,9 @@ skills:
   answer_check: reasoning # 独立求解，核对题目答案
   answer_judge: standard # 比对两个答案是否一致、说明分歧
   grade_subjective: vision
+  correction_guide: standard # 错题订正四步引导
   tutor: fast
+  tutor_vision: vision # 问一问里拍照提问
   safety_classify: fast
   ocr: ocr
   embed: embedding

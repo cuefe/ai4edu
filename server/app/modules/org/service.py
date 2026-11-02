@@ -2,7 +2,7 @@
 
 import uuid
 
-from sqlalchemy import case, func, or_, select
+from sqlalchemy import any_, case, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import AppError, NotFound
@@ -194,6 +194,63 @@ def class_ids_of(db: Session, tenant_id: uuid.UUID, user_id: uuid.UUID, role: Me
     )
 
 
+def class_names(db: Session, tenant_id: uuid.UUID, class_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    if not class_ids:
+        return {}
+    rows = db.execute(
+        select(Klass.id, Klass.name).where(Klass.tenant_id == tenant_id, Klass.id.in_(class_ids))
+    )
+    return {cid: name for cid, name in rows}
+
+
+def students_in_classes(
+    db: Session, tenant_id: uuid.UUID, class_ids: list[uuid.UUID]
+) -> list[tuple[uuid.UUID, uuid.UUID]]:
+    """这些班级里的学生，返回（学生 ID，班级 ID）。"""
+    if not class_ids:
+        return []
+    rows = db.execute(
+        select(ClassMember.user_id, ClassMember.klass_id)
+        .join(User, User.id == ClassMember.user_id)
+        .where(
+            ClassMember.tenant_id == tenant_id,
+            ClassMember.klass_id.in_(class_ids),
+            ClassMember.member_role == MemberRole.STUDENT,
+            User.active.is_(True),
+        )
+        .order_by(ClassMember.created_at)
+    )
+    return [(uid, kid) for uid, kid in rows]
+
+
+def teachers_of_student(db: Session, tenant_id: uuid.UUID, student_id: uuid.UUID) -> list[uuid.UUID]:
+    """学生所在班级的全部任课老师。"""
+    class_ids = class_ids_of(db, tenant_id, student_id, MemberRole.STUDENT)
+    if not class_ids:
+        return []
+    return list(
+        db.scalars(
+            select(ClassMember.user_id)
+            .where(
+                ClassMember.tenant_id == tenant_id,
+                ClassMember.klass_id.in_(class_ids),
+                ClassMember.member_role == MemberRole.TEACHER,
+            )
+            .distinct()
+        )
+    )
+
+
+def org_admins(db: Session, tenant_id: uuid.UUID) -> list[uuid.UUID]:
+    return list(
+        db.scalars(
+            select(User.id).where(
+                User.tenant_id == tenant_id, str(Role.ORG_ADMIN) == any_(User.roles), User.active.is_(True)
+            )
+        )
+    )
+
+
 # —— 老师和学生 ——
 
 
@@ -207,7 +264,7 @@ def get_user(db: Session, tenant_id: uuid.UUID, user_id: uuid.UUID) -> User:
 def list_users(
     db: Session, tenant_id: uuid.UUID, role: Role, *, class_id: uuid.UUID | None = None, q: str | None = None
 ) -> list[User]:
-    stmt = select(User).where(User.tenant_id == tenant_id, User.roles.any(str(role)))
+    stmt = select(User).where(User.tenant_id == tenant_id, str(role) == any_(User.roles))
     if class_id:
         stmt = stmt.join(ClassMember, ClassMember.user_id == User.id).where(ClassMember.klass_id == class_id)
     if q:

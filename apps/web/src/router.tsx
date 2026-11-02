@@ -10,7 +10,9 @@ import { TenantsPage } from "./pages/ops/TenantsPage";
 import { ClassesPage } from "./pages/org/ClassesPage";
 import { StudentsPage } from "./pages/org/StudentsPage";
 import { TeachersPage } from "./pages/org/TeachersPage";
+import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage";
 import { StudentHome } from "./pages/student/StudentHome";
+import { AssignmentsPage } from "./pages/teacher/AssignmentsPage";
 import { DocumentsPage } from "./pages/teacher/DocumentsPage";
 import { RecitePage } from "./pages/teacher/RecitePage";
 import { ResourcesPage } from "./pages/teacher/ResourcesPage";
@@ -27,6 +29,20 @@ const DocumentEditPage = lazy(() =>
 const ReciteDeckPage = lazy(() => import("./pages/teacher/ReciteDeckPage").then((m) => ({ default: m.ReciteDeckPage })));
 const QuestionsPage = lazy(() => import("./pages/teacher/QuestionsPage").then((m) => ({ default: m.QuestionsPage })));
 const QuestionGenPage = lazy(() => import("./pages/teacher/QuestionGenPage").then((m) => ({ default: m.QuestionGenPage })));
+const AssignmentNewPage = lazy(() =>
+  import("./pages/teacher/AssignmentNewPage").then((m) => ({ default: m.AssignmentNewPage })),
+);
+const AssignmentReportPage = lazy(() =>
+  import("./pages/teacher/AssignmentReportPage").then((m) => ({ default: m.AssignmentReportPage })),
+);
+const AlertsPage = lazy(() => import("./pages/AlertsPage").then((m) => ({ default: m.AlertsPage })));
+const StudentAssignmentPage = lazy(() =>
+  import("./pages/student/StudentAssignmentPage").then((m) => ({ default: m.StudentAssignmentPage })),
+);
+const ReviewPage = lazy(() => import("./pages/student/ReviewPage").then((m) => ({ default: m.ReviewPage })));
+const WrongBookPage = lazy(() => import("./pages/student/WrongBookPage").then((m) => ({ default: m.WrongBookPage })));
+const WrongItemPage = lazy(() => import("./pages/student/WrongBookPage").then((m) => ({ default: m.WrongItemPage })));
+const TutorPage = lazy(() => import("./pages/student/TutorPage").then((m) => ({ default: m.TutorPage })));
 
 function Lazy({ children }: { children: ReactNode }) {
   return <Suspense fallback={<Spin style={{ display: "block", marginTop: 96 }} />}>{children}</Suspense>;
@@ -99,12 +115,29 @@ export const router = createBrowserRouter([
               lazyRoute("questions", <QuestionsPage />),
               lazyRoute("questions/new", <QuestionGenPage />),
               { path: "resources", element: <ResourcesPage /> },
+              { path: "assignments", element: <AssignmentsPage /> },
+              lazyRoute("assignments/new", <AssignmentNewPage />),
+              lazyRoute("assignments/:id", <AssignmentReportPage />),
             ],
+          },
+          {
+            path: "alerts",
+            element: <RequireRole roles={["teacher", "org_admin"]} />,
+            children: [lazyRoute("", <AlertsPage />)],
           },
           {
             path: "student",
             element: <RequireRole roles={["student"]} />,
-            children: [{ index: true, element: <StudentHome /> }],
+            children: [
+              { index: true, element: <StudentHome /> },
+              { path: "assignments", element: <StudentAssignmentsPage /> },
+              lazyRoute("assignments/:id", <StudentAssignmentPage />),
+              lazyRoute("review", <ReviewPage />),
+              lazyRoute("wrong", <WrongBookPage />),
+              lazyRoute("wrong/:id", <WrongItemPage />),
+              lazyRoute("tutor", <TutorPage />),
+              lazyRoute("tutor/:sid", <TutorPage />),
+            ],
           },
           { path: "*", element: <NotFound /> },
         ],

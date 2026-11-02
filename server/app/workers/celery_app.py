@@ -18,7 +18,12 @@ celery_app = Celery(
     "ai4edu",
     broker="memory://" if _eager else settings.redis_url,
     backend="cache+memory://" if _eager else settings.redis_url,
-    include=["app.workers.tasks", "app.modules.library.tasks", "app.modules.qbank.tasks"],
+    include=[
+        "app.workers.tasks",
+        "app.modules.library.tasks",
+        "app.modules.qbank.tasks",
+        "app.modules.assignment.tasks",
+    ],
 )
 celery_app.conf.update(
     task_always_eager=_eager,

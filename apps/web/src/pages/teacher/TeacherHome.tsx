@@ -1,6 +1,6 @@
 import { BookOutlined, CreditCardOutlined, EditOutlined, FileTextOutlined, FolderOpenOutlined, SnippetsOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Col, Drawer, Empty, Row, Statistic, Table, Tag, Typography } from "antd";
+import { Card, Col, Drawer, Empty, Row, Statistic, Table, Typography } from "antd";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { api, unwrap, type Schemas } from "@/api/client";
@@ -10,14 +10,13 @@ import { PageHead } from "@/components/PageHead";
 type ClassOut = Schemas["ClassOut"];
 
 const TOOLS = [
+  { icon: <SnippetsOutlined />, title: "布置作业", desc: "从题库选题，加讲义阅读和背诵；客观题自动判分，解答题 AI 先批改", to: "/teacher/assignments/new" },
   { icon: <EditOutlined />, title: "AI 教案", desc: "填课题，几分钟生成可编辑的教案，导出 Word", to: "/teacher/lesson-plans/new" },
   { icon: <FileTextOutlined />, title: "AI 讲义", desc: "给学生的课堂讲义或复习讲义，标出考点，附练习和答案", to: "/teacher/handouts/new" },
   { icon: <CreditCardOutlined />, title: "背诵卡片", desc: "从讲义里抽取必背内容，做成问答卡和挖空卡", to: "/teacher/recite" },
   { icon: <BookOutlined />, title: "AI 出题", desc: "按知识点、题型、难度出题，自动校验答案，审核后入库", to: "/teacher/questions/new" },
   { icon: <FolderOpenOutlined />, title: "资料库", desc: "上传教案、课件、试卷，AI 备课时自动参考并标注出处", to: "/teacher/resources" },
 ];
-
-const COMING = [{ icon: <SnippetsOutlined />, title: "作业与批改", desc: "布置作业、自动批改、查看作业报告", stage: "M2" }];
 
 const ICON_STYLE = { fontSize: 22, color: "#2f6fed" };
 
@@ -75,24 +74,6 @@ export function TeacherHome() {
           <Col key={t.title} xs={24} sm={12} lg={8}>
             <Card hoverable onClick={() => navigate(t.to)}>
               <Card.Meta avatar={<span style={ICON_STYLE}>{t.icon}</span>} title={t.title} description={t.desc} />
-            </Card>
-          </Col>
-        ))}
-      </Row>
-      <Typography.Title level={5}>即将上线</Typography.Title>
-      <Row gutter={[16, 16]}>
-        {COMING.map((c) => (
-          <Col key={c.title} xs={24} sm={12} lg={8}>
-            <Card>
-              <Card.Meta
-                avatar={<span style={ICON_STYLE}>{c.icon}</span>}
-                title={
-                  <>
-                    {c.title} <Tag>{c.stage}</Tag>
-                  </>
-                }
-                description={c.desc}
-              />
             </Card>
           </Col>
         ))}

@@ -8,6 +8,7 @@ dependencies = [
     "celery[redis]>=5.6.3",
     "cryptography>=50.0.2",
     "fastapi>=0.162.0",
+    "fsrs>=6.3.2",
     "httpx>=0.28.1",
     "latex2mathml>=3.81.1",
     "markdown-it-py>=4.2.0",
@@ -56,3 +57,4 @@ ignore = ["B008"]
 
 [tool.ruff.lint.per-file-ignores]
 "app/ai/skills/*/prompt.py" = ["E501"]  # prompt 是成段的中文，按行宽折开反而难读
+"app/ai/skills/*/__init__.py" = ["E501"]  # 小技能的 prompt 直接写在包里

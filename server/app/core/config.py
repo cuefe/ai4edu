@@ -40,6 +40,15 @@ class Settings(BaseSettings):
     storage_dir: Path = SERVER_DIR / ".data" / "files"
     max_upload_mb: int = 50
 
+    # 学生在问一问里流露危机念头时显示的求助电话。号码写在配置里，可以按地区调整，不让模型自己编
+    crisis_hotlines: list[str] = [
+        "全国心理援助热线：12356",
+        "青少年服务台：12355",
+        "遇到紧急危险，请立即拨打 110 或 120",
+    ]
+    # 危机预警多久没处理算超时，超时的在机构管理员那里标红
+    crisis_escalate_hours: int = 2
+
     ai_config_path: Path = SERVER_DIR / "app" / "ai" / "gateway" / "models.yaml"
     ai_allow_mock: bool = True  # 没有可用模型时回退到 mock，生产环境必须关掉
 

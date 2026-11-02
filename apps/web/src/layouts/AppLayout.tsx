@@ -1,4 +1,5 @@
 import {
+  AlertOutlined,
   ApartmentOutlined,
   BookOutlined,
   CloudServerOutlined,
@@ -10,21 +11,21 @@ import {
   HomeOutlined,
   LogoutOutlined,
   MenuOutlined,
+  MessageOutlined,
   ReadOutlined,
   RobotOutlined,
   SnippetsOutlined,
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Space, Tag, Typography, type MenuProps } from "antd";
+import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Space, Typography, type MenuProps } from "antd";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
 import { ChangePasswordModal } from "@/components/ChangePasswordModal";
+import { NotificationBell } from "@/components/NotificationBell";
 
 type MenuItem = Required<MenuProps>["items"][number];
-
-const SOON = <Tag style={{ marginInlineStart: 8 }}>即将上线</Tag>;
 
 export function AppLayout() {
   const { me, hasRole, logout } = useAuth();
@@ -46,6 +47,7 @@ export function AppLayout() {
       ],
     });
   }
+  const alerts = { key: "/alerts", icon: <AlertOutlined />, label: "心理预警" };
   if (hasRole("org_admin")) {
     items.push({
       type: "group",
@@ -54,6 +56,7 @@ export function AppLayout() {
         { key: "/org/classes", icon: <ApartmentOutlined />, label: "班级" },
         { key: "/org/teachers", icon: <UserOutlined />, label: "老师" },
         { key: "/org/students", icon: <TeamOutlined />, label: "学生" },
+        ...(hasRole("teacher") ? [] : [alerts]), // 兼任老师的放在“教学”里，菜单里只出现一次
       ],
     });
   }
@@ -64,7 +67,8 @@ export function AppLayout() {
         label: "教学",
         children: [
           { key: "/teacher", icon: <HomeOutlined />, label: "我的班级" },
-          { key: "soon-homework", icon: <SnippetsOutlined />, label: <>作业{SOON}</>, disabled: true },
+          { key: "/teacher/assignments", icon: <SnippetsOutlined />, label: "作业" },
+          alerts,
         ],
       },
       {
@@ -84,7 +88,13 @@ export function AppLayout() {
     items.push({
       type: "group",
       label: "学习",
-      children: [{ key: "/student", icon: <ReadOutlined />, label: "首页" }],
+      children: [
+        { key: "/student", icon: <ReadOutlined />, label: "首页" },
+        { key: "/student/assignments", icon: <SnippetsOutlined />, label: "作业" },
+        { key: "/student/review", icon: <CreditCardOutlined />, label: "背诵" },
+        { key: "/student/wrong", icon: <BookOutlined />, label: "错题本" },
+        { key: "/student/tutor", icon: <MessageOutlined />, label: "问一问" },
+      ],
     });
   }
 
@@ -165,6 +175,7 @@ export function AppLayout() {
           )}
           <Space size="middle">
             {me?.tenant && !isMobile && <Typography.Text type="secondary">{me.tenant.name}</Typography.Text>}
+            {me?.tenant && <NotificationBell />}
             <Dropdown menu={{ items: userMenu }} trigger={["click"]}>
               <a onClick={(e) => e.preventDefault()} style={{ color: "inherit" }}>
                 <Space size={6}>
