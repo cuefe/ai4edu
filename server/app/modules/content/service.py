@@ -95,7 +95,8 @@ def start_lesson_plan(
         subject=p.subject,
         grade=p.grade,
         status=DocStatus.GENERATING,
-        params={**p.model_dump(), "prompt_version": lesson_plan.PROMPT_VERSION},
+        # mode="json"：resource_ids 是 UUID，原样存 JSONB 会序列化失败
+        params={**p.model_dump(mode="json"), "prompt_version": lesson_plan.PROMPT_VERSION},
     )
     db.add(doc)
     db.flush()

@@ -171,7 +171,8 @@ def test_lesson_plan_cites_library(client, monkeypatch):
     teacher = auth(client, "13811110001")
     r = _upload(client, teacher, "有理数笔记.md", NOTE.encode(), subject="数学")
 
-    events = _generate(client, teacher, {**BODY, "topic": "有理数的分类"})
+    # 指定只参考某几份资料
+    events = _generate(client, teacher, {**BODY, "topic": "有理数的分类", "resource_ids": [r["id"]]})
     names = [n for n, _ in events]
     assert names[:2] == ["created", "delta"] and "sources" in names
     sources = dict(events)["sources"]["items"]
