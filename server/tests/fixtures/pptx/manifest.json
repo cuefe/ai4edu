@@ -1,0 +1,301 @@
+{
+  "01-title-bullets.pptx": {
+    "subject": "数学",
+    "topic": "1.1 正数和负数（第 1 课时）",
+    "features": [
+      "标题页版式",
+      "标题＋内容版式",
+      "多级项目符号"
+    ],
+    "slides": 6,
+    "must_contain": [
+      "1.1 正数和负数（第 1 课时）",
+      "第一章 有理数",
+      "相反意义的量",
+      "海拔有高于海平面和低于海平面",
+      "会用正数和负数表示具有相反意义的量",
+      "大于 0 的数叫做正数",
+      "−3 读作“负三”",
+      "0 既不是正数也不是负数",
+      "支出 60 元记作 −60 元",
+      "要先规定哪个方向为正"
+    ],
+    "only_in_images": [],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [],
+    "tables": 0,
+    "charts": 0,
+    "images": 0
+  },
+  "02-tables-chart.pptx": {
+    "subject": "数学",
+    "topic": "正负数的应用：气温统计",
+    "features": [
+      "表格",
+      "合并单元格",
+      "柱形图（图表里的文字）"
+    ],
+    "slides": 3,
+    "must_contain": [
+      "某市一周气温（单位：℃）",
+      "星期三",
+      "最低气温",
+      "正整数",
+      "负分数",
+      "−1，−2，−3，…",
+      "一周最低气温（℃）"
+    ],
+    "only_in_images": [],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [],
+    "tables": 2,
+    "charts": 1,
+    "images": 0
+  },
+  "03-images.pptx": {
+    "subject": "数学",
+    "topic": "1.2.2 数轴",
+    "features": [
+      "图片",
+      "图片里的文字",
+      "图片替代文字（alt）"
+    ],
+    "slides": 2,
+    "must_contain": [
+      "规定了原点、正方向和单位长度的直线叫做数轴",
+      "0 以下是负数"
+    ],
+    "only_in_images": [
+      "点 A 表示 −2.5",
+      "此时温度：零下 5 ℃，记作 −5 ℃"
+    ],
+    "alt_texts": [
+      "数轴示意图：原点 O，向右为正方向，单位长度为 1"
+    ],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [],
+    "tables": 0,
+    "charts": 0,
+    "images": 2
+  },
+  "04-formula-images.pptx": {
+    "subject": "数学",
+    "topic": "1.2.4 绝对值",
+    "features": [
+      "公式是图片（模拟从公式编辑器粘贴）",
+      "少量公式是普通文字"
+    ],
+    "slides": 2,
+    "must_contain": [
+      "一个负数的绝对值是它的相反数",
+      "|−3| = 3"
+    ],
+    "only_in_images": [
+      "|a| = −a   (a < 0)",
+      "若 |x| = 2，则 x = ±2"
+    ],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [],
+    "tables": 0,
+    "charts": 0,
+    "images": 2
+  },
+  "05-speaker-notes.pptx": {
+    "subject": "数学",
+    "topic": "1.2.3 相反数",
+    "features": [
+      "页面文字很少，讲稿在演讲者备注里"
+    ],
+    "slides": 2,
+    "must_contain": [
+      "只有符号不同的两个数叫做互为相反数"
+    ],
+    "only_in_images": [],
+    "alt_texts": [],
+    "notes_contain": [
+      "先让学生在数轴上找出 2 和 −2",
+      "强调“只有符号不同”",
+      "0 的相反数是 0",
+      "学生容易认为 0 没有相反数"
+    ],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [],
+    "tables": 0,
+    "charts": 0,
+    "images": 0
+  },
+  "06-freeform-textboxes.pptx": {
+    "subject": "数学",
+    "topic": "1.2.5 有理数的大小比较",
+    "features": [
+      "全部是自由文本框，没有占位符",
+      "文本框在文件里的顺序和视觉顺序相反",
+      "组合图形",
+      "带文字的形状"
+    ],
+    "slides": 2,
+    "must_contain": [
+      "比较方法一：数轴法——右边的数总比左边的大",
+      "比较方法二：法则法——两个负数，绝对值大的反而小",
+      "例：比较 −3 和 −5 的大小",
+      "−3 > −5",
+      "因为 |−3| < |−5|",
+      "两个负数比较，不能只看数字本身"
+    ],
+    "only_in_images": [],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {
+      "0": [
+        "比较方法一：数轴法——右边的数总比左边的大",
+        "比较方法二：法则法——两个负数，绝对值大的反而小",
+        "例：比较 −3 和 −5 的大小"
+      ]
+    },
+    "noise": [],
+    "tables": 0,
+    "charts": 0,
+    "images": 0
+  },
+  "07-exercises.pptx": {
+    "subject": "数学",
+    "topic": "第一章 课堂练习",
+    "features": [
+      "选择题选项分散在多个文本框",
+      "答案在下一页",
+      "白色文字藏答案",
+      "填空横线"
+    ],
+    "slides": 3,
+    "must_contain": [
+      "下列各数中，是负数的是",
+      "A. 0",
+      "B. −2",
+      "C. 3",
+      "D. 1/2",
+      "向西走 3 米记作 ________ 米",
+      "参考答案",
+      "2. −3"
+    ],
+    "only_in_images": [],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [
+      "【答案】B"
+    ],
+    "reading_order": {},
+    "noise": [],
+    "tables": 0,
+    "charts": 0,
+    "images": 0
+  },
+  "08-english-unit1.pptx": {
+    "subject": "英语",
+    "topic": "Unit 1 You and Me · Section A",
+    "features": [
+      "中英混排",
+      "单词表（音标）",
+      "对话"
+    ],
+    "slides": 4,
+    "must_contain": [
+      "Unit 1 You and Me",
+      "认识新同学",
+      "/ˈklɑːsmeɪt/",
+      "业余爱好",
+      "favourite",
+      "What's your name?",
+      "Nice to meet you, too.",
+      "be 动词的用法",
+      "He / She is → He's / She's"
+    ],
+    "only_in_images": [],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [],
+    "tables": 1,
+    "charts": 0,
+    "images": 0
+  },
+  "09-hidden-empty-overflow.pptx": {
+    "subject": "数学",
+    "topic": "边角情况",
+    "features": [
+      "隐藏页",
+      "空白页",
+      "只有图片的页",
+      "文字溢出文本框"
+    ],
+    "slides": 5,
+    "must_contain": [
+      "本节课内容",
+      "这页是隐藏页，上课时不放映",
+      "最早认识和使用负数的国家之一",
+      "（本段结束）"
+    ],
+    "only_in_images": [
+      "图片里写着：负数比 0 小"
+    ],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [
+      1
+    ],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [],
+    "tables": 0,
+    "charts": 0,
+    "images": 1
+  },
+  "10-long-deck-wide.pptx": {
+    "subject": "数学",
+    "topic": "第一章 有理数 复习课（30 页）",
+    "features": [
+      "16:9",
+      "30 页长课件",
+      "每页重复的页脚和页码（应当作噪声去掉）"
+    ],
+    "slides": 30,
+    "must_contain": [
+      "知识点 1：正数和负数",
+      "知识点 30：有理数的大小比较",
+      "第 30 页"
+    ],
+    "only_in_images": [],
+    "alt_texts": [],
+    "notes_contain": [],
+    "hidden_slides": [],
+    "hidden_text": [],
+    "reading_order": {},
+    "noise": [
+      "七年级数学备课组 · 内部资料"
+    ],
+    "tables": 0,
+    "charts": 0,
+    "images": 0
+  }
+}
