@@ -1,5 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useCallback, useContext, useEffect, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { useNavigate } from "react-router";
 import { api, setSessionExpiredHandler, tokens, unwrap, type Me, type TokenOut } from "@/api/client";
 
@@ -18,7 +26,9 @@ const AuthContext = createContext<AuthValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const hasToken = Boolean(tokens.access());
+  // 必须订阅令牌变化：直接在渲染时读 localStorage，退出后这里不会重新渲染，
+  // me 会停留在旧账号，登录页又把人送回首页，形成跳转死循环
+  const hasToken = useSyncExternalStore(tokens.subscribe, () => Boolean(tokens.access()));
 
   const meQuery = useQuery({
     queryKey: ["me"],

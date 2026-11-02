@@ -26,16 +26,27 @@ function write(key: string, value: string | null) {
   }
 }
 
+const tokenListeners = new Set<() => void>();
+
+/** 令牌存储。可订阅：令牌被保存或清除时通知 AuthProvider 重新渲染，登录状态才不会停留在旧值。 */
 export const tokens = {
   access: () => read(ACCESS_KEY),
   refresh: () => read(REFRESH_KEY),
   save(t: Pick<TokenOut, "access_token" | "refresh_token">) {
     write(ACCESS_KEY, t.access_token);
     write(REFRESH_KEY, t.refresh_token);
+    tokenListeners.forEach((fn) => fn());
   },
   clear() {
     write(ACCESS_KEY, null);
     write(REFRESH_KEY, null);
+    tokenListeners.forEach((fn) => fn());
+  },
+  subscribe(fn: () => void) {
+    tokenListeners.add(fn);
+    return () => {
+      tokenListeners.delete(fn);
+    };
   },
 };
 
