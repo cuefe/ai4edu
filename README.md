@@ -20,6 +20,7 @@ server/            后端（FastAPI + SQLAlchemy + Celery）
 deploy/            Docker Compose、Nginx 配置
 evals/             AI 技能评测集（M1 起）
 docs/              规划与方案文档
+refs/              竞品资料；refs/materials/ 是本地测试用的真实教学资料和试卷（有版权，不入库，来源见其中 README）
 ```
 
 ## 本地开发
