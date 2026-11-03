@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
 from app.core.errors import NotFound
+from app.core.routing import DbRoute
 from app.modules.assignment import service, student, tasks
 from app.modules.assignment.models import Answer, AnswerStatus, AssignmentItem, Submission
 from app.modules.assignment.schemas import (
@@ -28,8 +29,8 @@ from app.modules.iam.schemas import OkOut
 from app.modules.ops.service import audit
 from app.workers import dispatch
 
-teacher_router = APIRouter(prefix="/teacher", tags=["作业"])
-student_router = APIRouter(prefix="/student/assignments", tags=["学生作业"])
+teacher_router = APIRouter(route_class=DbRoute, prefix="/teacher", tags=["作业"])
+student_router = APIRouter(route_class=DbRoute, prefix="/student/assignments", tags=["学生作业"])
 
 Teacher = Depends(require_roles(Role.TEACHER))
 Student = Depends(require_roles(Role.STUDENT))

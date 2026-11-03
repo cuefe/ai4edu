@@ -6,8 +6,13 @@ import { HomeRedirect, RequireAuth, RequireRole } from "./auth/guards";
 import { AppLayout } from "./layouts/AppLayout";
 import { LoginPage } from "./pages/LoginPage";
 import { AiPage } from "./pages/ops/AiPage";
+import { AuditPage } from "./pages/ops/AuditPage";
+import { PlansPage } from "./pages/ops/PlansPage";
+import { SafetyPage } from "./pages/ops/SafetyPage";
 import { TenantsPage } from "./pages/ops/TenantsPage";
+import { UsagePage } from "./pages/ops/UsagePage";
 import { ClassesPage } from "./pages/org/ClassesPage";
+import { OverviewPage } from "./pages/org/OverviewPage";
 import { StudentsPage } from "./pages/org/StudentsPage";
 import { TeachersPage } from "./pages/org/TeachersPage";
 import { StudentAssignmentsPage } from "./pages/student/StudentAssignmentsPage";
@@ -87,13 +92,18 @@ export const router = createBrowserRouter([
             element: <RequireRole roles={["platform_admin"]} />,
             children: [
               { path: "tenants", element: <TenantsPage /> },
+              { path: "plans", element: <PlansPage /> },
+              { path: "usage", element: <UsagePage /> },
               { path: "ai", element: <AiPage /> },
+              { path: "safety", element: <SafetyPage /> },
+              { path: "audit", element: <AuditPage /> },
             ],
           },
           {
             path: "org",
             element: <RequireRole roles={["org_admin"]} />,
             children: [
+              { path: "overview", element: <OverviewPage /> },
               { path: "classes", element: <ClassesPage /> },
               { path: "teachers", element: <TeachersPage /> },
               { path: "students", element: <StudentsPage /> },

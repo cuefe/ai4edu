@@ -1,8 +1,9 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
+from decimal import Decimal
 from enum import StrEnum
 
-from sqlalchemy import ARRAY, Boolean, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import ARRAY, Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, TimestampMixin, new_id
@@ -17,7 +18,10 @@ class Role(StrEnum):
 
 
 class Tenant(TimestampMixin, Base):
-    """机构：一所学校或一家教培机构。"""
+    """机构：一所学校或一家教培机构。
+
+    名额和额度开通时按套餐带出，可以单独调整；为空表示不限。
+    """
 
     __tablename__ = "tenant"
 
@@ -26,6 +30,15 @@ class Tenant(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(String(100))
     kind: Mapped[str] = mapped_column(String(16))  # school / institution
     active: Mapped[bool] = mapped_column(Boolean, default=True)
+    plan_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("plan.id", ondelete="SET NULL"))
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # 到期后不能登录
+    student_quota: Mapped[int | None] = mapped_column(Integer)  # 启用中的学生账号上限
+    teacher_quota: Mapped[int | None] = mapped_column(Integer)  # 启用中的老师账号上限（含管理员）
+    ai_budget_yuan: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))  # 每月 AI 费用上限
+    note: Mapped[str] = mapped_column(Text, default="")  # 运营备注：合同、联系人等
+
+    def expired(self, now: datetime | None = None) -> bool:
+        return self.expires_at is not None and self.expires_at <= (now or datetime.now(UTC))
 
 
 class User(TimestampMixin, Base):

@@ -6,13 +6,14 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.deps import require_roles
+from app.core.routing import DbRoute
 from app.modules.iam.models import Role, User
 from app.modules.safety import service
 from app.modules.safety.service import AlertOut
 from app.modules.tutor import service as tutor
 from app.modules.tutor.service import MessageOut
 
-router = APIRouter(prefix="/alerts", tags=["心理预警"])
+router = APIRouter(route_class=DbRoute, prefix="/alerts", tags=["心理预警"])
 
 Staff = Depends(require_roles(Role.TEACHER, Role.ORG_ADMIN))
 

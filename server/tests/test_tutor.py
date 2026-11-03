@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from app.core.config import get_settings
 from app.modules.notify import service as notify_service
 from app.modules.tutor import service as tutor_service
 from tests.fake_ai import FakeChat
@@ -195,7 +196,7 @@ def test_correction_mode_and_quota(client, ai, monkeypatch):
     _send(client, s1, session["id"], "我没思路")
     assert "订正模式" in ai.calls[-1]["messages"][0]["content"]
 
-    monkeypatch.setattr(tutor_service, "DAILY_LIMIT", 1)
+    monkeypatch.setattr(get_settings(), "student_daily_tutor_messages", 1)
     resp = client.post(
         f"/api/student/tutor/sessions/{session['id']}/messages", headers=s1, json={"text": "还有"}
     )

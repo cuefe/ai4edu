@@ -22,17 +22,16 @@ from app.core import storage
 from app.core.config import get_settings
 from app.core.db import session_scope
 from app.core.errors import AppError, Forbidden, NotFound
-from app.core.redis import get_redis
 from app.modules.assignment import student as assignments
 from app.modules.assignment.models import ItemType, SubmissionStatus
 from app.modules.iam.models import User
 from app.modules.learning import service as learning
+from app.modules.ops import quota
 from app.modules.safety import service as safety_service
 from app.modules.tutor.models import ChatMessage, ChatSession
 
 log = logging.getLogger(__name__)
 
-DAILY_LIMIT = 200  # 每个学生每天最多发多少条，防止刷量
 HISTORY = 12  # 回答时带上最近几条对话
 MAX_IMAGES = 3
 
@@ -220,15 +219,6 @@ def message_image(
 # —— 发消息 ——
 
 
-def _check_quota(student_id: uuid.UUID) -> None:
-    key = f"tutor:quota:{student_id}:{datetime.now(UTC):%Y%m%d}"
-    redis = get_redis()
-    count = redis.incr(key)
-    redis.expire(key, 2 * 24 * 3600)
-    if count > DAILY_LIMIT:
-        raise AppError("今天问得太多啦，休息一下，明天再来吧", code="quota", status=429)
-
-
 async def _classify(ctx: CallContext, text: str) -> safety.SafetyResult:
     keyword = safety.keyword_check(text)
     if not text.strip():
@@ -303,7 +293,7 @@ async def send(
     prefix = _image_prefix(tenant_id, student_id)
     if any(not k.startswith(prefix) for k in body.images):
         raise AppError("图片不存在，请重新上传")
-    _check_quota(student_id)
+    await anyio.to_thread.run_sync(quota.start_tutor_message, tenant_id, student_id)
     ctx = CallContext(tenant_id=tenant_id, user_id=student_id)
 
     def prepare() -> tuple[ChatSession, list[ChatMessage], User]:

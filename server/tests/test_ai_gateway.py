@@ -208,5 +208,5 @@ def test_ops_create_tenant(client):
     assert client.post("/api/ops/tenants", headers=headers, json=body).status_code == 200
     assert client.post("/api/ops/tenants", headers=headers, json=body).status_code == 409
     tenants = client.get("/api/ops/tenants", headers=headers).json()
-    assert [(t["code"], t["user_count"]) for t in tenants] == [("school1", 1)]
+    assert [(t["code"], t["teachers"], t["students"]) for t in tenants] == [("school1", 1, 0)]
     assert auth(client, "13700000000")

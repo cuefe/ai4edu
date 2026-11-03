@@ -4,10 +4,12 @@
 # - 每个档位（tiers）按顺序尝试候选模型，失败自动切换到下一个。
 # - model 写固定的模型名；model_env 表示从环境变量读取（模型 ID 因账号而异的平台用）。
 # - 2026-11 确定用 DeepSeek＋通义（阿里云百炼），不接入豆包。加供应商只需在 providers 和 tiers 里登记。
-# - price 单位：元 / 百万 token。不填则用量表里不计算费用。上线前请按各平台官网价格填写。
+# - price 单位：元 / 百万 token，不填则不计算费用，也不计入机构的 AI 月额度。
+#   2026-11-03 按官网原价填写：DeepSeek 分高峰、低谷（低谷半价），这里按高峰价，额度只会多算不会少算；
+#   通义按最低一档（输入 32K / 128K 以内），不含上下文缓存折扣。调价后改这里。
 # - 所有候选都不可用时，开发环境回退到 mock（AI_ALLOW_MOCK=true），生产环境直接报错。
 # - 优先用不带日期的别名（如 qwen-flash），平台会自动指向最新版本。模型下线时调用会报 404，
-#   在「平台运营 → AI 模型」的用量表里能看到失败次数。2026-11 已确认 qwen-turbo、qwen-vl-plus 不可用。
+#   在「平台运营 → AI 用量」里能看到失败次数。2026-11 已确认 qwen-turbo、qwen-vl-plus 不可用。
 
 providers:
   deepseek:
@@ -17,28 +19,31 @@ providers:
     base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
     api_key_env: DASHSCOPE_API_KEY
 
+# 2026-11 deepseek-chat、deepseek-reasoner 都由 deepseek-flash 提供（后者开思考），按 flash 计价
+x-prices:
+  deepseek-flash: &deepseek-flash { input: 2, output: 8 }
+
 tiers:
   flagship: # 长文生成：教案、讲义、出题
-    - { provider: deepseek, model: deepseek-chat }
-    - { provider: dashscope, model: qwen-max }
+    - { provider: deepseek, model: deepseek-chat, price: *deepseek-flash }
+    - { provider: dashscope, model: qwen-max, price: { input: 2.4, output: 9.6 } }
   standard: # 结构化抽取：背诵点、知识点标签
-    - { provider: dashscope, model: qwen-plus }
-    - { provider: deepseek, model: deepseek-chat }
-  # 理科解题、答案校验。2026-11 实测 deepseek-chat、deepseek-reasoner 都由 deepseek-flash 提供（后者开思考），
-  # 出题用的也是它；校验首选 v4-pro，和出题模型不同，错误不容易重合
+    - { provider: dashscope, model: qwen-plus, price: { input: 0.8, output: 2 } }
+    - { provider: deepseek, model: deepseek-chat, price: *deepseek-flash }
+  # 理科解题、答案校验。出题用的是 deepseek-flash；校验首选 v4-pro，和出题模型不同，错误不容易重合
   reasoning:
-    - { provider: deepseek, model: deepseek-v4-pro }
-    - { provider: deepseek, model: deepseek-reasoner }
+    - { provider: deepseek, model: deepseek-v4-pro, price: { input: 9, output: 27 } }
+    - { provider: deepseek, model: deepseek-reasoner, price: *deepseek-flash }
   vision: # 拍照作答识别、主观题批改（暂无备用）
-    - { provider: dashscope, model: qwen3-vl-plus }
+    - { provider: dashscope, model: qwen3-vl-plus, price: { input: 1, output: 10 } }
   fast: # 实时答疑、安全分类
-    - { provider: dashscope, model: qwen-flash }
-    - { provider: deepseek, model: deepseek-chat }
+    - { provider: dashscope, model: qwen-flash, price: { input: 0.15, output: 1.5 } }
+    - { provider: deepseek, model: deepseek-chat, price: *deepseek-flash }
   ocr: # 扫描件、图片转文字
-    - { provider: dashscope, model: qwen-vl-ocr }
-    - { provider: dashscope, model: qwen3-vl-plus }
+    - { provider: dashscope, model: qwen-vl-ocr, price: { input: 0.3, output: 0.5 } }
+    - { provider: dashscope, model: qwen3-vl-plus, price: { input: 1, output: 10 } }
   embedding: # 资料检索的向量模型。只用第一个候选；换模型后要重新解析资料，旧向量和新向量不能比较
-    - { provider: dashscope, model: text-embedding-v4 }
+    - { provider: dashscope, model: text-embedding-v4, price: { input: 0.5, output: 0 } }
 
 skills:
   ping: fast # 运营后台连通性测试

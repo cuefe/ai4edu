@@ -5,7 +5,7 @@ import jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.db import set_rls_context
+from app.core.db import session_scope, set_rls_context
 from app.core.errors import AppError, Unauthorized
 from app.core.redis import get_redis
 from app.core.security import (
@@ -18,10 +18,12 @@ from app.core.security import (
     mask_phone,
     normalize_phone,
     phone_hash,
+    verify_and_upgrade,
     verify_password,
 )
 from app.modules.iam.models import Role, Tenant, User
 from app.modules.iam.schemas import MeOut, TenantBrief, TokenOut
+from app.modules.ops.service import audit
 
 MAX_LOGIN_FAILURES = 10
 LOGIN_LOCK_SECONDS = 15 * 60
@@ -77,7 +79,9 @@ def to_me(db: Session, user: User) -> MeOut:
         username=user.username,
         phone_masked=user_phone_masked(user),
         must_change_password=user.must_change_password,
-        tenant=TenantBrief(id=tenant.id, code=tenant.code, name=tenant.name, kind=tenant.kind)
+        tenant=TenantBrief(
+            id=tenant.id, code=tenant.code, name=tenant.name, kind=tenant.kind, expires_at=tenant.expires_at
+        )
         if tenant
         else None,
     )
@@ -106,35 +110,67 @@ def _check_not_locked(key: str) -> None:
         raise AppError("密码错误次数过多，请 15 分钟后再试", code="login_locked", status=429)
 
 
-def _record_failure(key: str) -> None:
+def _record_failure(key: str, user: User | None, ip: str) -> None:
     redis = get_redis()
-    redis.incr(f"login:fail:{key}")
+    failures = redis.incr(f"login:fail:{key}")
     redis.expire(f"login:fail:{key}", LOGIN_LOCK_SECONDS)
+    if user is not None:
+        # 请求的事务会因为登录失败回滚，审计记录用单独的会话写
+        with session_scope(bypass=True) as db:
+            audit(
+                db,
+                tenant_id=user.tenant_id,
+                actor_id=user.id,
+                action="login_failed",
+                ip=ip,
+                locked=failures >= MAX_LOGIN_FAILURES,
+            )
+
+
+def ensure_tenant_usable(db: Session, user: User) -> None:
+    """机构停用或服务到期后，机构里的账号都不能登录、不能续期登录状态。"""
+    if user.tenant_id is None:
+        return
+    tenant = db.get(Tenant, user.tenant_id)
+    if tenant is None or not tenant.active:
+        raise AppError("所在机构已停用", code="tenant_disabled", status=403)
+    if tenant.expired():
+        raise AppError("所在机构的服务已到期，请联系机构管理员续费", code="tenant_expired", status=403)
 
 
 def _ensure_can_login(db: Session, user: User) -> None:
     if not user.active:
         raise AppError("账号已停用，请联系管理员", code="user_disabled", status=403)
-    if user.tenant_id is not None:
-        tenant = db.get(Tenant, user.tenant_id)
-        if tenant is None or not tenant.active:
-            raise AppError("所在机构已停用", code="tenant_disabled", status=403)
+    ensure_tenant_usable(db, user)
     user.last_login_at = datetime.now(UTC)
 
 
-def login_with_phone(db: Session, phone: str, password: str) -> User:
+def audit_login(db: Session, user: User, method: str, ip: str) -> None:
+    audit(db, tenant_id=user.tenant_id, actor_id=user.id, action="login", method=method, ip=ip)
+
+
+def _password_ok(user: User | None, password: str) -> bool:
+    if user is None:
+        return False
+    ok, upgraded = verify_and_upgrade(password, user.password_hash)
+    if ok and upgraded:
+        user.password_hash = upgraded  # 旧参数的哈希换成当前参数（core/security.py）
+    return ok
+
+
+def login_with_phone(db: Session, phone: str, password: str, ip: str = "") -> User:
     key = phone_hash(phone)
     _check_not_locked(key)
     user = db.scalar(select(User).where(User.phone_hash == key))
-    if user is None or not verify_password(password, user.password_hash):
-        _record_failure(key)
+    if user is None or not _password_ok(user, password):
+        _record_failure(key, user, ip)
         raise AppError("手机号或密码错误", code="bad_credentials", status=401)
     get_redis().delete(f"login:fail:{key}")
     _ensure_can_login(db, user)
     return user
 
 
-def login_student(db: Session, tenant_code: str, username: str, password: str) -> User:
+def login_student(db: Session, tenant_code: str, username: str, password: str, ip: str = "") -> User:
     key = f"{tenant_code.strip().lower()}:{username.strip()}"
     _check_not_locked(key)
     user = db.scalar(
@@ -142,8 +178,8 @@ def login_student(db: Session, tenant_code: str, username: str, password: str) -
         .join(Tenant, Tenant.id == User.tenant_id)
         .where(Tenant.code == tenant_code.strip().lower(), User.username == username.strip())
     )
-    if user is None or not verify_password(password, user.password_hash):
-        _record_failure(key)
+    if user is None or not _password_ok(user, password):
+        _record_failure(key, user, ip)
         raise AppError("机构代码、账号或密码错误", code="bad_credentials", status=401)
     get_redis().delete(f"login:fail:{key}")
     _ensure_can_login(db, user)
@@ -171,6 +207,7 @@ def refresh_tokens(db: Session, refresh_token: str) -> TokenOut:
     user = db.get(User, uuid.UUID(payload["sub"]))
     if user is None or not user.active or user.token_version != payload.get("ver"):
         raise Unauthorized("登录已失效，请重新登录")
+    ensure_tenant_usable(db, user)
     return issue_tokens(db, user)
 
 

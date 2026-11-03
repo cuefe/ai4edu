@@ -6,12 +6,13 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.deps import get_current_user, tenant_of
+from app.core.routing import DbRoute
 from app.modules.iam.models import User
 from app.modules.iam.schemas import OkOut
 from app.modules.notify import service
 from app.modules.notify.service import NotificationList
 
-router = APIRouter(prefix="/me/notifications", tags=["站内信"])
+router = APIRouter(route_class=DbRoute, prefix="/me/notifications", tags=["站内信"])
 
 
 class ReadIn(BaseModel):

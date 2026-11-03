@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
@@ -96,3 +98,30 @@ class ImportResultOut(BaseModel):
 
 class ResetPasswordOut(BaseModel):
     password: str
+
+
+class UserPatch(BaseModel):
+    active: bool
+
+
+class SeatUsage(BaseModel):
+    used: int
+    quota: int | None = Field(description="为空表示不限")
+
+
+class SkillUsage(BaseModel):
+    skill: str
+    calls: int
+    cost_yuan: Decimal
+
+
+class OrgOverviewOut(BaseModel):
+    name: str
+    code: str
+    plan_name: str | None
+    expires_at: datetime | None
+    students: SeatUsage
+    teachers: SeatUsage
+    ai_spend_yuan: Decimal = Field(description="本月 AI 费用（北京时间自然月）")
+    ai_budget_yuan: Decimal | None = Field(description="每月 AI 费用上限，为空表示不限")
+    ai_by_skill: list[SkillUsage] = Field(description="本月各功能的调用次数和费用")

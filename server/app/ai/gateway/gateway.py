@@ -1,6 +1,6 @@
 """模型网关：业务代码统一从这里调用大模型。
 
-职责：按技能选模型、失败切换备用模型、去除个人信息、记录每次调用的用量和费用。
+职责：按技能选模型、失败切换备用模型、去除个人信息、记录每次调用的用量和费用、机构 AI 额度用完时拒绝调用。
 供应商（目前是 DeepSeek、通义）都提供 OpenAI 兼容接口，所以统一用 openai SDK 调用。
 """
 
@@ -65,6 +65,25 @@ class UsageSink(Protocol):
     async def record(self, rec: UsageRecord) -> None: ...
 
 
+class BudgetGuard(Protocol):
+    async def check(self, tenant_id: uuid.UUID) -> None:
+        """机构的 AI 额度用完时抛出 AppError。"""
+        ...
+
+
+# 额度用完也照常调用的技能：危机识别不能因为没额度而停掉
+BUDGET_EXEMPT = frozenset({"safety_classify"})
+
+
+class DbBudgetGuard:
+    """按机构的 AI 月额度拦截（ops.quota）。"""
+
+    async def check(self, tenant_id: uuid.UUID) -> None:
+        from app.modules.ops import quota
+
+        await anyio.to_thread.run_sync(quota.ensure_ai_budget, tenant_id)
+
+
 class DbUsageSink:
     """写入 ai_usage 表。用独立会话，不影响调用方的事务。"""
 
@@ -124,11 +143,23 @@ def _last_user_text(messages: Messages) -> str:
 
 
 class AIGateway:
-    def __init__(self, config: GatewayConfig, *, sink: UsageSink | None = None, allow_mock: bool = False):
+    def __init__(
+        self,
+        config: GatewayConfig,
+        *,
+        sink: UsageSink | None = None,
+        budget: BudgetGuard | None = None,
+        allow_mock: bool = False,
+    ):
         self.config = config
         self.sink = sink
+        self.budget = budget
         self.allow_mock = allow_mock
         self._clients: dict[str, AsyncOpenAI] = {}
+
+    async def _check_budget(self, skill: str, ctx: CallContext) -> None:
+        if self.budget and ctx.tenant_id and skill not in BUDGET_EXEMPT:
+            await self.budget.check(ctx.tenant_id)
 
     def candidates(self, skill: str) -> list[Candidate]:
         found = self.config.candidates(skill)
@@ -149,6 +180,7 @@ class AIGateway:
             await self.sink.record(rec)
 
     async def chat(self, skill: str, messages: Messages, *, ctx: CallContext, **params: Any) -> ChatResult:
+        await self._check_budget(skill, ctx)
         messages = redact_messages(messages)
         candidates = self.candidates(skill)
         for c in candidates:
@@ -191,6 +223,7 @@ class AIGateway:
         self, skill: str, messages: Messages, *, ctx: CallContext, **params: Any
     ) -> AsyncIterator[str]:
         """流式输出。只在第一段内容返回前切换备用模型；开始输出后出错直接抛出。"""
+        await self._check_budget(skill, ctx)
         messages = redact_messages(messages)
         for c in self.candidates(skill):
             started = time.monotonic()
@@ -249,6 +282,7 @@ class AIGateway:
         不同模型的向量不能放在一起比较，所以只用第一个候选、不切换备用；模型标识要和向量一起存下来，
         检索时只比较同一模型的向量。
         """
+        await self._check_budget(skill, ctx)
         candidates = self.candidates(skill)
         if not candidates:
             raise AppError("AI 服务暂时不可用，请稍后再试", code="ai_unavailable", status=503)
@@ -297,7 +331,12 @@ def build_gateway() -> AIGateway:
     # 测试时不读 .env，避免开发者本地配置的真实 Key 被测试调用
     env_file = None if settings.env == "test" else SERVER_DIR / ".env"
     config = GatewayConfig.load(settings.ai_config_path, env_file)
-    return AIGateway(config, sink=DbUsageSink(), allow_mock=settings.ai_allow_mock and not settings.is_prod)
+    return AIGateway(
+        config,
+        sink=DbUsageSink(),
+        budget=DbBudgetGuard(),
+        allow_mock=settings.ai_allow_mock and not settings.is_prod,
+    )
 
 
 @lru_cache

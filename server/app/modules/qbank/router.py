@@ -8,8 +8,10 @@ from sqlalchemy.orm import Session
 from app.ai.skills.question_gen import QuestionGenIn
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
+from app.core.routing import DbRoute
 from app.modules.iam.models import Role, User
 from app.modules.iam.schemas import OkOut
+from app.modules.ops import quota
 from app.modules.ops.service import audit
 from app.modules.qbank import service, tasks
 from app.modules.qbank.models import PENDING_REVIEW, Question, QuestionStatus
@@ -23,7 +25,7 @@ from app.modules.qbank.schemas import (
 )
 from app.workers import dispatch
 
-router = APIRouter(prefix="/teacher", tags=["题库"])
+router = APIRouter(route_class=DbRoute, prefix="/teacher", tags=["题库"])
 
 Teacher = Depends(require_roles(Role.TEACHER))
 
@@ -48,6 +50,7 @@ def _out(db: Session, q: Question, user: User) -> QuestionOut:
     description="出题和校验在后台进行，用返回的 ID 查询进度",
 )
 def generate(body: QuestionGenIn, user: User = Teacher, db: Session = Depends(get_db)):
+    quota.start_teacher_task(tenant_of(user), user.id)
     batch = service.start_batch(db, tenant_of(user), user.id, body)
     db.commit()
     dispatch.submit(tasks.generate_batch, str(batch.id))
@@ -151,6 +154,7 @@ def reject(qid: uuid.UUID, user: User = Teacher, db: Session = Depends(get_db)):
 @router.post("/questions/{qid}/recheck", response_model=QuestionOut, summary="重新校验答案")
 def recheck(qid: uuid.UUID, user: User = Teacher, db: Session = Depends(get_db)):
     q = service.get_owned(db, tenant_of(user), user.id, qid)
+    quota.ensure_ai_budget(q.tenant_id)
     service.mark_for_recheck(q)
     db.commit()
     dispatch.submit(tasks.check_question, str(q.id))

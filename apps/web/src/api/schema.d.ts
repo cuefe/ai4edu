@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 可用的登录方式 */
+        get: operations["methods_api_auth_methods_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login/phone": {
         parameters: {
             query?: never;
@@ -330,6 +347,40 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/org/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 机构概况：套餐、到期、名额、本月 AI 用量 */
+        get: operations["overview_api_org_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/org/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** 停用或启用账号 */
+        patch: operations["update_user_api_org_users__user_id__patch"];
         trace?: never;
     };
     "/api/org/users/{user_id}/reset-password": {
@@ -1384,6 +1435,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/ops/tenants/{tenant_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** 修改机构：套餐、名额、额度、到期、停用 */
+        patch: operations["update_tenant_api_ops_tenants__tenant_id__patch"];
+        trace?: never;
+    };
+    "/api/ops/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Plans */
+        get: operations["list_plans_api_ops_plans_get"];
+        put?: never;
+        /** 新建套餐 */
+        post: operations["create_plan_api_ops_plans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ops/plans/{plan_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * 修改套餐
+         * @description 只影响之后开通、续费的机构，已开通机构的名额和额度不变
+         */
+        put: operations["update_plan_api_ops_plans__plan_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/ops/ai/status": {
         parameters: {
             query?: never;
@@ -1425,8 +1531,76 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** AI 用量汇总 */
+        /** AI 用量明细（按机构、技能、模型） */
         get: operations["ai_usage_api_ops_ai_usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ops/usage/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** AI 用量汇总：合计、按机构、按天 */
+        get: operations["usage_summary_api_ops_usage_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ops/moderation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 内容安全记录（被拦下的消息和危机信号） */
+        get: operations["moderation_api_ops_moderation_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ops/alerts/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 各机构危机预警的处理情况 */
+        get: operations["alerts_summary_api_ops_alerts_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/ops/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 审计日志 */
+        get: operations["audit_log_api_ops_audit_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1542,6 +1716,30 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** AlertSummaryRow */
+        AlertSummaryRow: {
+            /**
+             * Tenant Id
+             * Format: uuid
+             */
+            tenant_id: string;
+            /** Tenant Name */
+            tenant_name: string;
+            /** Open */
+            open: number;
+            /**
+             * Overdue
+             * @description 超过时限还没处理的
+             */
+            overdue: number;
+            /** Handled */
+            handled: number;
+            /**
+             * High
+             * @description 高风险（含已处理）
+             */
+            high: number;
         };
         /** AnswerOut */
         AnswerOut: {
@@ -1716,6 +1914,48 @@ export interface components {
             item_stats: components["schemas"]["ItemStat"][];
             /** Submissions */
             submissions: components["schemas"]["SubmissionRow"][];
+        };
+        /** AuditPage */
+        AuditPage: {
+            /** Items */
+            items: components["schemas"]["AuditRow"][];
+            /** Total */
+            total: number;
+        };
+        /** AuditRow */
+        AuditRow: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Tenant Name */
+            tenant_name: string | null;
+            /** Actor Name */
+            actor_name: string | null;
+            /** Action */
+            action: string;
+            /** Target Type */
+            target_type: string | null;
+            /** Target Id */
+            target_id: string | null;
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            };
+        };
+        /** AuthMethodsOut */
+        AuthMethodsOut: {
+            /**
+             * Sms
+             * @description 是否开通了短信验证码登录
+             */
+            sms: boolean;
         };
         /** BatchOut */
         BatchOut: {
@@ -1968,6 +2208,18 @@ export interface components {
             class_name: string | null;
             /** Password */
             password: string;
+        };
+        /** DailyUsageRow */
+        DailyUsageRow: {
+            /**
+             * Day
+             * Format: date
+             */
+            day: string;
+            /** Calls */
+            calls: number;
+            /** Cost Yuan */
+            cost_yuan: string;
         };
         /** DeckBrief */
         DeckBrief: {
@@ -2499,6 +2751,38 @@ export interface components {
              */
             created_at: string;
         };
+        /** ModerationPage */
+        ModerationPage: {
+            /** Items */
+            items: components["schemas"]["ModerationRow"][];
+            /** Total */
+            total: number;
+        };
+        /** ModerationRow */
+        ModerationRow: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Tenant Name */
+            tenant_name: string;
+            /** Source */
+            source: string;
+            /** Category */
+            category: string;
+            /** Crisis */
+            crisis: string;
+            /** Reason */
+            reason: string;
+            /** Excerpt */
+            excerpt: string;
+        };
         /** NotificationList */
         NotificationList: {
             /** Items */
@@ -2537,12 +2821,116 @@ export interface components {
              */
             ok: boolean;
         };
+        /** OrgOverviewOut */
+        OrgOverviewOut: {
+            /** Name */
+            name: string;
+            /** Code */
+            code: string;
+            /** Plan Name */
+            plan_name: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            students: components["schemas"]["SeatUsage"];
+            teachers: components["schemas"]["SeatUsage"];
+            /**
+             * Ai Spend Yuan
+             * @description 本月 AI 费用（北京时间自然月）
+             */
+            ai_spend_yuan: string;
+            /**
+             * Ai Budget Yuan
+             * @description 每月 AI 费用上限，为空表示不限
+             */
+            ai_budget_yuan: string | null;
+            /**
+             * Ai By Skill
+             * @description 本月各功能的调用次数和费用
+             */
+            ai_by_skill: components["schemas"]["SkillUsage"][];
+        };
         /** PhoneLoginIn */
         PhoneLoginIn: {
             /** Phone */
             phone: string;
             /** Password */
             password: string;
+        };
+        /** PlanIn */
+        PlanIn: {
+            /** Name */
+            name: string;
+            /**
+             * Student Quota
+             * @description 为空表示不限
+             */
+            student_quota?: number | null;
+            /** Teacher Quota */
+            teacher_quota?: number | null;
+            /**
+             * Ai Budget Yuan
+             * @description 每月
+             */
+            ai_budget_yuan?: number | string | null;
+            /**
+             * Months
+             * @description 服务期（月）
+             * @default 12
+             */
+            months: number;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Active
+             * @default true
+             */
+            active: boolean;
+        };
+        /** PlanOut */
+        PlanOut: {
+            /** Name */
+            name: string;
+            /**
+             * Student Quota
+             * @description 为空表示不限
+             */
+            student_quota?: number | null;
+            /** Teacher Quota */
+            teacher_quota?: number | null;
+            /**
+             * Ai Budget Yuan
+             * @description 每月
+             */
+            ai_budget_yuan?: string | null;
+            /**
+             * Months
+             * @description 服务期（月）
+             * @default 12
+             */
+            months: number;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Active
+             * @default true
+             */
+            active: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Tenant Count
+             * @default 0
+             */
+            tenant_count: number;
         };
         /** QuestionCounts */
         QuestionCounts: {
@@ -2963,6 +3351,16 @@ export interface components {
              */
             k: number;
         };
+        /** SeatUsage */
+        SeatUsage: {
+            /** Used */
+            used: number;
+            /**
+             * Quota
+             * @description 为空表示不限
+             */
+            quota: number | null;
+        };
         /** SelfCheckIn */
         SelfCheckIn: {
             /** Correct */
@@ -3057,6 +3455,15 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** SkillUsage */
+        SkillUsage: {
+            /** Skill */
+            skill: string;
+            /** Calls */
+            calls: number;
+            /** Cost Yuan */
+            cost_yuan: string;
         };
         /** SmsLoginIn */
         SmsLoginIn: {
@@ -3274,9 +3681,29 @@ export interface components {
             name: string;
             /** Kind */
             kind: string;
+            /**
+             * Expires At
+             * @description 服务到期时间，为空表示不限
+             */
+            expires_at?: string | null;
         };
         /** TenantIn */
         TenantIn: {
+            /** Plan Id */
+            plan_id?: string | null;
+            /** Expires At */
+            expires_at?: string | null;
+            /** Student Quota */
+            student_quota?: number | null;
+            /** Teacher Quota */
+            teacher_quota?: number | null;
+            /** Ai Budget Yuan */
+            ai_budget_yuan?: number | string | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
             /** Code */
             code: string;
             /** Name */
@@ -3310,11 +3737,92 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Plan Id */
+            plan_id: string | null;
+            /** Plan Name */
+            plan_name: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            /** Student Quota */
+            student_quota: number | null;
+            /** Teacher Quota */
+            teacher_quota: number | null;
+            /** Ai Budget Yuan */
+            ai_budget_yuan: string | null;
+            /** Note */
+            note: string;
             /**
-             * User Count
+             * Students
+             * @description 启用中的学生账号
+             */
+            students: number;
+            /**
+             * Teachers
+             * @description 启用中的老师账号（含管理员）
+             */
+            teachers: number;
+            /**
+             * Ai Spend Yuan
+             * @description 本月 AI 费用
+             */
+            ai_spend_yuan: string;
+        };
+        /**
+         * TenantPatch
+         * @description 只改传了的字段；名额、额度、到期时间传 null 表示改成不限。
+         */
+        TenantPatch: {
+            /** Plan Id */
+            plan_id?: string | null;
+            /** Expires At */
+            expires_at?: string | null;
+            /** Student Quota */
+            student_quota?: number | null;
+            /** Teacher Quota */
+            teacher_quota?: number | null;
+            /** Ai Budget Yuan */
+            ai_budget_yuan?: number | string | null;
+            /** Note */
+            note?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Active */
+            active?: boolean | null;
+        };
+        /** TenantUsageRow */
+        TenantUsageRow: {
+            /**
+             * Calls
              * @default 0
              */
-            user_count: number;
+            calls: number;
+            /**
+             * Failures
+             * @default 0
+             */
+            failures: number;
+            /**
+             * Prompt Tokens
+             * @default 0
+             */
+            prompt_tokens: number;
+            /**
+             * Completion Tokens
+             * @default 0
+             */
+            completion_tokens: number;
+            /**
+             * Cost Yuan
+             * @default 0
+             */
+            cost_yuan: string;
+            /** Tenant Id */
+            tenant_id: string | null;
+            /**
+             * Tenant Name
+             * @description 为空表示平台自己的调用（如运营后台测试）
+             */
+            tenant_name: string | null;
         };
         /** TokenOut */
         TokenOut: {
@@ -3328,6 +3836,45 @@ export interface components {
              */
             token_type: string;
             user: components["schemas"]["MeOut"];
+        };
+        /** UsageSummaryOut */
+        UsageSummaryOut: {
+            total: components["schemas"]["UsageTotals"];
+            /** By Tenant */
+            by_tenant: components["schemas"]["TenantUsageRow"][];
+            /**
+             * Daily
+             * @description 按北京时间的日期
+             */
+            daily: components["schemas"]["DailyUsageRow"][];
+        };
+        /** UsageTotals */
+        UsageTotals: {
+            /**
+             * Calls
+             * @default 0
+             */
+            calls: number;
+            /**
+             * Failures
+             * @default 0
+             */
+            failures: number;
+            /**
+             * Prompt Tokens
+             * @default 0
+             */
+            prompt_tokens: number;
+            /**
+             * Completion Tokens
+             * @default 0
+             */
+            completion_tokens: number;
+            /**
+             * Cost Yuan
+             * @default 0
+             */
+            cost_yuan: string;
         };
         /** UserOut */
         UserOut: {
@@ -3344,6 +3891,11 @@ export interface components {
             username?: string | null;
             /** Phone Masked */
             phone_masked?: string | null;
+            /** Active */
+            active: boolean;
+        };
+        /** UserPatch */
+        UserPatch: {
             /** Active */
             active: boolean;
         };
@@ -3437,6 +3989,26 @@ export interface operations {
                     "application/json": {
                         [key: string]: string;
                     };
+                };
+            };
+        };
+    };
+    methods_api_auth_methods_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthMethodsOut"];
                 };
             };
         };
@@ -4120,6 +4692,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImportResultOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    overview_api_org_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgOverviewOut"];
+                };
+            };
+        };
+    };
+    update_user_api_org_users__user_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserOut"];
                 };
             };
             /** @description Validation Error */
@@ -6444,6 +7071,129 @@ export interface operations {
             };
         };
     };
+    update_tenant_api_ops_tenants__tenant_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                tenant_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TenantPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TenantOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_plans_api_ops_plans_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"][];
+                };
+            };
+        };
+    };
+    create_plan_api_ops_plans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_plan_api_ops_plans__plan_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                plan_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     ai_status_api_ops_ai_status_get: {
         parameters: {
             query?: never;
@@ -6515,6 +7265,126 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AiUsageRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    usage_summary_api_ops_usage_summary_get: {
+        parameters: {
+            query?: {
+                days?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    moderation_api_ops_moderation_get: {
+        parameters: {
+            query?: {
+                tenant_id?: string | null;
+                category?: string | null;
+                crisis_only?: boolean;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModerationPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    alerts_summary_api_ops_alerts_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AlertSummaryRow"][];
+                };
+            };
+        };
+    };
+    audit_log_api_ops_audit_get: {
+        parameters: {
+            query?: {
+                tenant_id?: string | null;
+                action?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditPage"];
                 };
             };
             /** @description Validation Error */

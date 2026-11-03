@@ -395,6 +395,34 @@ body,
   background: #f6f9ff;
 }
 
+/* —— 运营后台、机构概况 —— */
+
+.quota-meter {
+  min-width: 120px;
+}
+
+.quota-meter-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.quota-meter .ant-progress {
+  margin: 2px 0 0;
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.audit-detail {
+  font-size: 12px;
+  color: #555;
+  word-break: break-all;
+}
+
 .math-preview {
   min-height: 48px;
   margin: 12px 0 8px;

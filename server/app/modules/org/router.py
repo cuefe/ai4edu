@@ -8,9 +8,13 @@ from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
 from app.core.errors import AppError, Forbidden
+from app.core.routing import DbRoute
 from app.modules.iam import service as iam
-from app.modules.iam.models import Role, User
+from app.modules.iam.models import Role, Tenant, User
 from app.modules.iam.schemas import OkOut
+from app.modules.ops import quota
+from app.modules.ops import service as ops_service
+from app.modules.ops.models import Plan
 from app.modules.ops.service import audit
 from app.modules.org import importer, service
 from app.modules.org.models import MemberRole
@@ -23,18 +27,22 @@ from app.modules.org.schemas import (
     ImportResultOut,
     MemberIn,
     MemberOut,
+    OrgOverviewOut,
     ResetPasswordOut,
+    SeatUsage,
+    SkillUsage,
     StudentCreatedOut,
     StudentIn,
     TeacherIn,
     UserOut,
+    UserPatch,
 )
 
 MAX_IMPORT_BYTES = 5 * 1024 * 1024
 
-org_router = APIRouter(prefix="/org", tags=["机构管理"])
-teacher_router = APIRouter(prefix="/teacher", tags=["教师"])
-student_router = APIRouter(prefix="/student", tags=["学生"])
+org_router = APIRouter(route_class=DbRoute, prefix="/org", tags=["机构管理"])
+teacher_router = APIRouter(route_class=DbRoute, prefix="/teacher", tags=["教师"])
+student_router = APIRouter(route_class=DbRoute, prefix="/student", tags=["学生"])
 
 OrgAdmin = Depends(require_roles(Role.ORG_ADMIN))
 
@@ -161,6 +169,50 @@ def import_students(file: UploadFile = File(...), user: User = OrgAdmin, db: Ses
     )
     db.commit()
     return result
+
+
+@org_router.get(
+    "/overview", response_model=OrgOverviewOut, summary="机构概况：套餐、到期、名额、本月 AI 用量"
+)
+def overview(user: User = OrgAdmin, db: Session = Depends(get_db)):
+    tenant_id = tenant_of(user)
+    tenant = db.get(Tenant, tenant_id)
+    assert tenant is not None
+    plan = db.get(Plan, tenant.plan_id) if tenant.plan_id else None
+    since = quota.month_start()
+    return OrgOverviewOut(
+        name=tenant.name,
+        code=tenant.code,
+        plan_name=plan.name if plan else None,
+        expires_at=tenant.expires_at,
+        students=SeatUsage(used=quota.seats_used(db, tenant_id, Role.STUDENT), quota=tenant.student_quota),
+        teachers=SeatUsage(used=quota.seats_used(db, tenant_id, Role.TEACHER), quota=tenant.teacher_quota),
+        ai_spend_yuan=quota.month_spend(db, tenant_id),
+        ai_budget_yuan=tenant.ai_budget_yuan,
+        ai_by_skill=[
+            SkillUsage(skill=skill, calls=calls, cost_yuan=cost)
+            for skill, calls, cost in ops_service.usage_by_skill(db, tenant_id, since)
+        ],
+    )
+
+
+@org_router.patch("/users/{user_id}", response_model=UserOut, summary="停用或启用账号")
+def update_user(user_id: uuid.UUID, body: UserPatch, user: User = OrgAdmin, db: Session = Depends(get_db)):
+    tenant_id = tenant_of(user)
+    target = service.get_user(db, tenant_id, user_id)
+    was_active = target.active
+    service.set_active(db, tenant_id, user, target, body.active)
+    if target.active != was_active:
+        audit(
+            db,
+            tenant_id=tenant_id,
+            actor_id=user.id,
+            action="enable_user" if target.active else "disable_user",
+            target_type="user",
+            target_id=target.id,
+        )
+    db.commit()
+    return service.to_user_out(target)
 
 
 @org_router.post("/users/{user_id}/reset-password", response_model=ResetPasswordOut)

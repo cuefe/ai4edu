@@ -11,4 +11,6 @@ COPY . .
 ENV PATH="/app/.venv/bin:$PATH"
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+# 进程数由环境变量 WEB_CONCURRENCY 决定（docker-compose 里的 API_WORKERS）。
+# api 只在内网、由 web 容器的 Nginx 转发，所以信任所有来源的 X-Forwarded-For（只用于审计记录里的 IP）
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]

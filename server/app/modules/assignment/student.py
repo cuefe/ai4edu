@@ -288,20 +288,28 @@ def submit(db: Session, a: Assignment, sub: Submission) -> bool:
     sub.status = SubmissionStatus.SUBMITTED
     sub.submitted_at = now()
     need_ai = False
-    for item in items_of(db, a.id):
-        if item.item_type != ItemType.QUESTION:
-            continue
-        answer = _answer(db, sub, item)
-        q = item.content
-        blank = not answer.response.strip() and not answer.images
-        ratio = 0.0 if blank else objective_ratio(q["qtype"], q["answer"], answer.response)
-        if ratio is None:  # 解答题、判断不了的填空：AI 批改后老师确认
-            answer.status = AnswerStatus.GRADING
-            need_ai = True
-            continue
-        answer.status = AnswerStatus.AUTO
-        answer.score = points(ratio, item.score)
-        answer.correct = ratio == 1
-        record_result(db, a, sub, item, answer)
+    # 一次查出全部作答，循环里不自动写库：逐题查询、写库在全班同时提交时会明显变慢（压测）
+    answers = {x.item_id: x for x in db.scalars(select(Answer).where(Answer.submission_id == sub.id))}
+    with db.no_autoflush:
+        for item in items_of(db, a.id):
+            if item.item_type != ItemType.QUESTION:
+                continue
+            answer = answers.get(item.id)
+            if answer is None:  # 没作答过的题
+                answer = Answer(
+                    tenant_id=sub.tenant_id, submission_id=sub.id, item_id=item.id, student_id=sub.student_id
+                )
+                db.add(answer)
+            q = item.content
+            blank = not (answer.response or "").strip() and not answer.images
+            ratio = 0.0 if blank else objective_ratio(q["qtype"], q["answer"], answer.response)
+            if ratio is None:  # 解答题、判断不了的填空：AI 批改后老师确认
+                answer.status = AnswerStatus.GRADING
+                need_ai = True
+                continue
+            answer.status = AnswerStatus.AUTO
+            answer.score = points(ratio, item.score)
+            answer.correct = ratio == 1
+            record_result(db, a, sub, item, answer)
     refresh_submission(db, sub)
     return need_ai

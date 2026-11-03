@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -37,6 +38,11 @@ class TenantBrief(BaseModel):
     code: str
     name: str
     kind: str
+    expires_at: datetime | None = Field(default=None, description="服务到期时间，为空表示不限")
+
+
+class AuthMethodsOut(BaseModel):
+    sms: bool = Field(description="是否开通了短信验证码登录")
 
 
 class MeOut(BaseModel):

@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import secrets
+import threading
 import uuid
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
@@ -9,22 +10,37 @@ from typing import Any, Literal
 import jwt
 from cryptography.fernet import Fernet
 from pwdlib import PasswordHash
+from pwdlib.hashers.argon2 import Argon2Hasher
 
 from app.core.config import get_settings
 
-_password_hash = PasswordHash.recommended()
+# Argon2id，参数按 OWASP 建议的下限（19 MiB、2 轮、1 线程）。pwdlib 默认要 64 MiB，上课时全班一起登录，
+# 几十个并发校验就要用掉 2 GB 内存。旧参数生成的哈希照样能校验（参数存在哈希里）
+_password_hash = PasswordHash((Argon2Hasher(memory_cost=19456, time_cost=2, parallelism=1),))
+# 每个进程同时最多算几个密码哈希，多出来的排队：内存有上限，也不会把 CPU 全占了让其他请求变慢
+_hash_slots = threading.BoundedSemaphore(4)
 
 TokenType = Literal["access", "refresh"]
 
 
 def hash_password(password: str) -> str:
-    return _password_hash.hash(password)
+    with _hash_slots:
+        return _password_hash.hash(password)
 
 
 def verify_password(password: str, hashed: str | None) -> bool:
     if not hashed:
         return False
-    return _password_hash.verify(password, hashed)
+    with _hash_slots:
+        return _password_hash.verify(password, hashed)
+
+
+def verify_and_upgrade(password: str, hashed: str | None) -> tuple[bool, str | None]:
+    """登录时校验密码；旧参数生成的哈希顺便换成当前参数，返回（是否正确，新哈希或 None）。"""
+    if not hashed:
+        return False, None
+    with _hash_slots:
+        return _password_hash.verify_and_update(password, hashed)
 
 
 def generate_password(length: int = 8) -> str:

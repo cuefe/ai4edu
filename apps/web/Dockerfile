@@ -10,4 +10,5 @@ RUN pnpm --filter web build
 
 FROM nginx:1.27-alpine
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+COPY deploy/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /repo/apps/web/dist /usr/share/nginx/html

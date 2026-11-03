@@ -17,6 +17,25 @@ def test_phone_login_and_me(client):
     assert me.json()["name"] == "t1 管理员"
 
 
+def test_old_password_hash_upgraded_on_login(client):
+    from pwdlib import PasswordHash
+    from pwdlib.hashers.argon2 import Argon2Hasher
+    from sqlalchemy import select
+
+    from app.core.db import session_scope
+    from app.modules.iam.models import User
+
+    make_tenant("t1", "13811110000")
+    old = PasswordHash((Argon2Hasher(),)).hash("admin123")  # pwdlib 默认参数：64 MiB
+    with session_scope(bypass=True) as db:
+        db.scalar(select(User).where(User.name == "t1 管理员")).password_hash = old
+    assert auth(client, "13811110000")
+    with session_scope(bypass=True) as db:
+        upgraded = db.scalar(select(User.password_hash).where(User.name == "t1 管理员"))
+    assert upgraded != old and "m=19456" in upgraded
+    assert auth(client, "13811110000")
+
+
 def test_wrong_password_and_lockout(client):
     make_tenant("t1", "13811110000")
     for _ in range(10):

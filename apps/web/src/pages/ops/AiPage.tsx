@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Alert, App, Button, Card, Form, Input, Segmented, Select, Space, Table, Tag, Typography } from "antd";
-import { useState } from "react";
+import { Alert, App, Button, Card, Form, Input, Select, Space, Table, Tag, Typography } from "antd";
 import { api, unwrap } from "@/api/client";
+import { SKILL_LABEL } from "@/components/labels";
 import { PageHead } from "@/components/PageHead";
 
 const TIER_LABEL: Record<string, string> = {
@@ -14,15 +14,9 @@ const TIER_LABEL: Record<string, string> = {
 
 export function AiPage() {
   const { message } = App.useApp();
-  const [days, setDays] = useState(7);
   const status = useQuery({ queryKey: ["ops", "ai", "status"], queryFn: async () => unwrap(await api.GET("/api/ops/ai/status")) });
-  const usage = useQuery({
-    queryKey: ["ops", "ai", "usage", days],
-    queryFn: async () => unwrap(await api.GET("/api/ops/ai/usage", { params: { query: { days } } })),
-  });
   const test = useMutation({
     mutationFn: async (v: { skill: string; prompt: string }) => unwrap(await api.POST("/api/ops/ai/test", { body: v })),
-    onSuccess: () => usage.refetch(),
     onError: (e) => message.error(e.message),
   });
 
@@ -39,7 +33,7 @@ export function AiPage() {
           description="在 server/.env 里填写 DEEPSEEK_API_KEY 和 DASHSCOPE_API_KEY 后重启后端。"
         />
       )}
-      <Card title="技能与模型路由" size="small">
+      <Card title="功能与模型路由" size="small" extra="价格和路由在 server/app/ai/gateway/models.yaml 里改">
         <Table
           size="small"
           rowKey="skill"
@@ -48,7 +42,18 @@ export function AiPage() {
           pagination={false}
           scroll={{ x: 520 }}
           columns={[
-            { title: "技能", dataIndex: "skill", render: (s) => <Typography.Text code>{s}</Typography.Text> },
+            {
+              title: "功能",
+              dataIndex: "skill",
+              render: (s) => (
+                <Space size={4}>
+                  {SKILL_LABEL[s] ?? s}
+                  <Typography.Text type="secondary" code>
+                    {s}
+                  </Typography.Text>
+                </Space>
+              ),
+            },
             { title: "档位", dataIndex: "tier", render: (t) => TIER_LABEL[t] ?? t },
             {
               title: "可用模型（按优先级）",
@@ -68,8 +73,11 @@ export function AiPage() {
       </Card>
       <Card title="调用测试" size="small">
         <Form layout="vertical" initialValues={{ skill: "ping", prompt: "用一句话介绍勾股定理" }} onFinish={(v) => test.mutate(v)}>
-          <Form.Item name="skill" label="技能">
-            <Select style={{ maxWidth: 240 }} options={(status.data ?? []).map((s) => ({ value: s.skill, label: s.skill }))} />
+          <Form.Item name="skill" label="功能">
+            <Select
+              style={{ maxWidth: 240 }}
+              options={(status.data ?? []).map((s) => ({ value: s.skill, label: SKILL_LABEL[s.skill] ?? s.skill }))}
+            />
           </Form.Item>
           <Form.Item name="prompt" label="输入" rules={[{ required: true }]}>
             <Input.TextArea rows={3} maxLength={2000} />
@@ -86,38 +94,6 @@ export function AiPage() {
             description={<Typography.Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>{test.data.text}</Typography.Paragraph>}
           />
         )}
-      </Card>
-      <Card
-        title="用量"
-        size="small"
-        extra={
-          <Segmented
-            value={days}
-            onChange={(v) => setDays(v as number)}
-            options={[
-              { label: "7 天", value: 7 },
-              { label: "30 天", value: 30 },
-            ]}
-          />
-        }
-      >
-        <Table
-          size="small"
-          rowKey={(r) => `${r.tenant_id}-${r.skill}-${r.provider}-${r.model}`}
-          loading={usage.isLoading}
-          dataSource={usage.data}
-          scroll={{ x: 720 }}
-          columns={[
-            { title: "机构", dataIndex: "tenant_name", render: (n) => n ?? "平台" },
-            { title: "技能", dataIndex: "skill" },
-            { title: "模型", render: (_, r) => `${r.provider} / ${r.model}` },
-            { title: "调用", dataIndex: "calls" },
-            { title: "失败", dataIndex: "failures", render: (n) => (n ? <Tag color="red">{n}</Tag> : 0) },
-            { title: "输入 token", dataIndex: "prompt_tokens" },
-            { title: "输出 token", dataIndex: "completion_tokens" },
-            { title: "费用（元）", dataIndex: "cost_yuan", render: (c) => (c == null ? "未配置价格" : Number(c).toFixed(4)) },
-          ]}
-        />
       </Card>
     </Space>
   );

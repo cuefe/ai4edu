@@ -7,13 +7,14 @@ from sqlalchemy.orm import Session
 from app.ai.gateway.gateway import CallContext
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
+from app.core.routing import DbRoute
 from app.modules.iam.models import Role, User
 from app.modules.iam.schemas import OkOut
 from app.modules.learning import review, service
 from app.modules.learning.review import RateIn, RateOut, ReviewToday
 from app.modules.learning.service import RedoOut, WrongBook, WrongItemOut
 
-router = APIRouter(prefix="/student", tags=["错题本与背诵"])
+router = APIRouter(route_class=DbRoute, prefix="/student", tags=["错题本与背诵"])
 
 Student = Depends(require_roles(Role.STUDENT))
 

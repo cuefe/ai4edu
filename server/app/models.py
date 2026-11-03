@@ -8,7 +8,7 @@ from app.modules.iam.models import Tenant, User
 from app.modules.learning.models import ReviewLog, ReviewState, WrongItem
 from app.modules.library.models import Resource, ResourceChunk
 from app.modules.notify.models import Notification
-from app.modules.ops.models import AuditLog
+from app.modules.ops.models import AuditLog, Plan
 from app.modules.org.models import Campus, ClassMember, Klass
 from app.modules.qbank.models import Question, QuestionBatch, QuestionCheck
 from app.modules.recite.models import ReciteCard, ReciteDeck
@@ -31,6 +31,7 @@ __all__ = [
     "Klass",
     "ModerationLog",
     "Notification",
+    "Plan",
     "Question",
     "QuestionBatch",
     "QuestionCheck",

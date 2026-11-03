@@ -15,6 +15,7 @@ from app.ai.skills.lesson_plan import LessonPlanIn
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
 from app.core.errors import AppError
+from app.core.routing import DbRoute
 from app.modules.content import generation, service
 from app.modules.content.docx_export import doc_to_docx
 from app.modules.content.models import DocStatus, DocType
@@ -22,9 +23,10 @@ from app.modules.content.schemas import DocumentBrief, DocumentOut, DocumentUpda
 from app.modules.content.skills import DOC_SKILLS, DocInput
 from app.modules.iam.models import Role, User
 from app.modules.iam.schemas import OkOut
+from app.modules.ops import quota
 from app.modules.ops.service import audit
 
-router = APIRouter(prefix="/teacher", tags=["备课"])
+router = APIRouter(route_class=DbRoute, prefix="/teacher", tags=["备课"])
 # 教案、讲义共用 /documents 系列接口，按 doc_type 区分
 
 Teacher = Depends(require_roles(Role.TEACHER))
@@ -52,6 +54,7 @@ async def _generate(doc_type: DocType, body: DocInput, user: User, db: Session) 
     tenant_id = tenant_of(user)
 
     def create() -> uuid.UUID:
+        quota.start_teacher_task(tenant_id, user.id)
         doc = service.start_generation(db, tenant_id, user.id, doc_type, body)
         db.commit()
         return doc.id

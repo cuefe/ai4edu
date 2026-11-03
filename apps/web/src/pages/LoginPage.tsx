@@ -1,5 +1,6 @@
 import { LockOutlined, MobileOutlined, SafetyOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import { App, Button, Card, Form, Input, Segmented, Space, Tabs, Typography } from "antd";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 import { api, unwrap, type TokenOut } from "@/api/client";
@@ -19,6 +20,9 @@ function StaffLogin({ onDone }: { onDone: (t: TokenOut) => void }) {
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [mode, setMode] = useState<"password" | "sms">("password");
+  // 没开通短信时只有密码登录
+  const methods = useQuery({ queryKey: ["auth", "methods"], queryFn: async () => unwrap(await api.GET("/api/auth/methods")) });
+  const smsEnabled = methods.data?.sms ?? false;
   const [loading, setLoading] = useState(false);
   const [left, setLeft] = useCountdown();
 
@@ -37,7 +41,7 @@ function StaffLogin({ onDone }: { onDone: (t: TokenOut) => void }) {
     setLoading(true);
     try {
       const t =
-        mode === "password"
+        mode === "password" || !smsEnabled
           ? unwrap(await api.POST("/api/auth/login/phone", { body: { phone: v.phone, password: v.password! } }))
           : unwrap(await api.POST("/api/auth/login/sms", { body: { phone: v.phone, code: v.code! } }));
       onDone(t);
@@ -50,17 +54,19 @@ function StaffLogin({ onDone }: { onDone: (t: TokenOut) => void }) {
 
   return (
     <Form form={form} size="large" onFinish={submit} requiredMark={false}>
-      <Form.Item>
-        <Segmented
-          block
-          value={mode}
-          onChange={(v) => setMode(v as "password" | "sms")}
-          options={[
-            { label: "密码登录", value: "password" },
-            { label: "验证码登录", value: "sms" },
-          ]}
-        />
-      </Form.Item>
+      {smsEnabled && (
+        <Form.Item>
+          <Segmented
+            block
+            value={mode}
+            onChange={(v) => setMode(v as "password" | "sms")}
+            options={[
+              { label: "密码登录", value: "password" },
+              { label: "验证码登录", value: "sms" },
+            ]}
+          />
+        </Form.Item>
+      )}
       <Form.Item
         name="phone"
         rules={[
@@ -70,7 +76,7 @@ function StaffLogin({ onDone }: { onDone: (t: TokenOut) => void }) {
       >
         <Input prefix={<MobileOutlined />} placeholder="手机号" inputMode="tel" autoComplete="tel" />
       </Form.Item>
-      {mode === "password" ? (
+      {mode === "password" || !smsEnabled ? (
         <Form.Item name="password" rules={[{ required: true, message: "请输入密码" }]}>
           <Input.Password prefix={<LockOutlined />} placeholder="密码" autoComplete="current-password" />
         </Form.Item>

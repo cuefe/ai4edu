@@ -83,7 +83,7 @@ export function useAuth(): AuthValue {
 /** 登录后默认进入的页面，按角色优先级。 */
 export function homePath(me: Pick<Me, "roles">): string {
   if (me.roles.includes("platform_admin")) return "/ops/tenants";
-  if (me.roles.includes("org_admin")) return "/org/classes";
+  if (me.roles.includes("org_admin")) return "/org/overview";
   if (me.roles.includes("teacher")) return "/teacher";
   if (me.roles.includes("student")) return "/student";
   return "/login";

@@ -11,14 +11,16 @@ from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
 from app.core.errors import AppError
+from app.core.routing import DbRoute
 from app.modules.iam.models import Role, User
 from app.modules.iam.schemas import OkOut
 from app.modules.library import service, tasks
 from app.modules.library.schemas import ChunkOut, ResourceOut, ResourcePatch, SearchHit, SearchIn
+from app.modules.ops import quota
 from app.modules.ops.service import audit
 from app.workers import dispatch
 
-router = APIRouter(prefix="/teacher/resources", tags=["资料库"])
+router = APIRouter(route_class=DbRoute, prefix="/teacher/resources", tags=["资料库"])
 
 Teacher = Depends(require_roles(Role.TEACHER))
 
@@ -36,6 +38,7 @@ def upload(
     user: User = Teacher,
     db: Session = Depends(get_db),
 ):
+    quota.ensure_ai_budget(tenant_of(user))  # 解析要用 OCR 和向量模型
     limit = get_settings().max_upload_mb * 1024 * 1024
     data = file.file.read(limit + 1)
     r = service.create_resource(
@@ -74,6 +77,7 @@ def update_resource(rid: uuid.UUID, body: ResourcePatch, user: User = Teacher, d
 @router.post("/{rid}/reparse", response_model=ResourceOut, summary="重新解析")
 def reparse(rid: uuid.UUID, user: User = Teacher, db: Session = Depends(get_db)):
     r = service.get_owned(db, tenant_of(user), user.id, rid)
+    quota.ensure_ai_budget(r.tenant_id)
     service.mark_for_reparse(r)
     db.commit()
     dispatch.submit(tasks.parse_resource, str(r.id))

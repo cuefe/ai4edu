@@ -123,6 +123,9 @@ def import_students(db: Session, tenant_id: uuid.UUID, content: bytes) -> Import
             if exc.code == "username_taken":
                 skipped += 1
                 errors.append(RowError(row=row_no, message=f"学号 {username} 已存在，已跳过"))
+            elif exc.code == "seat_quota":
+                errors.append(RowError(row=row_no, message=f"{exc.message}。从这一行起都没有导入"))
+                break
             else:
                 errors.append(RowError(row=row_no, message=exc.message))
             continue

@@ -8,13 +8,15 @@ from app.ai.gateway.gateway import CallContext
 from app.ai.skills.recite_cards import ReciteIn
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
+from app.core.routing import DbRoute
 from app.modules.iam.models import Role, User
 from app.modules.iam.schemas import OkOut
+from app.modules.ops import quota
 from app.modules.ops.service import audit
 from app.modules.recite import service
 from app.modules.recite.schemas import DeckBrief, DeckOut, DeckUpdate
 
-router = APIRouter(prefix="/teacher/recite-decks", tags=["背诵卡片"])
+router = APIRouter(route_class=DbRoute, prefix="/teacher/recite-decks", tags=["背诵卡片"])
 
 Teacher = Depends(require_roles(Role.TEACHER))
 
@@ -27,6 +29,7 @@ def list_decks(user: User = Teacher, db: Session = Depends(get_db)):
 @router.post("/generate", response_model=DeckOut, summary="AI 抽取背诵点", description="大约需要半分钟")
 async def generate(body: ReciteIn, user: User = Teacher, db: Session = Depends(get_db)):
     tenant_id = tenant_of(user)
+    await run_in_threadpool(quota.start_teacher_task, tenant_id, user.id)
     deck_id = await service.generate(CallContext(tenant_id=tenant_id, user_id=user.id), body)
     return await run_in_threadpool(
         lambda: service.to_out(db, service.get_deck(db, tenant_id, user.id, deck_id))

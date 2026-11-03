@@ -238,7 +238,9 @@ def test_manual_question(client):
 
     assert client.delete(f"/api/teacher/questions/{q['id']}", headers=teacher).json() == {"ok": True}
     with open_session(bypass=True) as db:
-        assert db.scalars(select(AuditLog.action)).all() == ["delete_question"]
+        assert db.scalars(select(AuditLog.action).where(AuditLog.action != "login")).all() == [
+            "delete_question"
+        ]
 
 
 def test_bad_output_fails_batch(client, ai):

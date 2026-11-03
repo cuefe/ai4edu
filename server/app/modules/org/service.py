@@ -5,10 +5,12 @@ import uuid
 from sqlalchemy import any_, case, func, or_, select
 from sqlalchemy.orm import Session
 
-from app.core.errors import AppError, NotFound
+from app.core.errors import AppError, Forbidden, NotFound
 from app.core.security import generate_password
 from app.modules.iam import service as iam
+from app.modules.iam import sms
 from app.modules.iam.models import Role, User
+from app.modules.ops import quota
 from app.modules.org.models import Campus, ClassMember, Klass, MemberRole
 from app.modules.org.schemas import (
     CampusIn,
@@ -274,6 +276,8 @@ def list_users(
 
 
 def create_teacher(db: Session, tenant_id: uuid.UUID, body: TeacherIn) -> User:
+    sms.require_password_if_disabled(body.password)
+    quota.ensure_seat(db, tenant_id, Role.TEACHER)
     roles = [Role.TEACHER, Role.ORG_ADMIN] if body.is_org_admin else [Role.TEACHER]
     return iam.create_user(
         db, tenant_id=tenant_id, name=body.name, roles=roles, phone=body.phone, password=body.password
@@ -281,6 +285,7 @@ def create_teacher(db: Session, tenant_id: uuid.UUID, body: TeacherIn) -> User:
 
 
 def create_student(db: Session, tenant_id: uuid.UUID, body: StudentIn) -> tuple[User, str | None]:
+    quota.ensure_seat(db, tenant_id, Role.STUDENT)
     if body.class_id:
         get_class(db, tenant_id, body.class_id)
     generated = None if body.password else generate_password()
@@ -296,3 +301,20 @@ def create_student(db: Session, tenant_id: uuid.UUID, body: StudentIn) -> tuple[
     if body.class_id:
         add_member(db, tenant_id, body.class_id, user.id, MemberRole.STUDENT)
     return user, generated
+
+
+def set_active(db: Session, tenant_id: uuid.UUID, actor: User, target: User, active: bool) -> None:
+    """停用或启用账号。停用的账号不能登录、不占名额，已登录的设备马上退出。"""
+    if target.id == actor.id:
+        raise AppError("不能停用自己的账号")
+    if target.has_role(Role.ORG_ADMIN):
+        raise Forbidden("不能停用机构管理员，请联系平台")
+    if active == target.active:
+        return
+    if active:
+        role = quota.seat_role(target.roles)
+        if role:
+            quota.ensure_seat(db, tenant_id, role)
+    else:
+        target.token_version += 1
+    target.active = active

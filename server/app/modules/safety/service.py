@@ -8,13 +8,13 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
 from app.ai.skills.safety import SafetyResult
 from app.core.config import get_settings
 from app.core.errors import Forbidden, NotFound
-from app.modules.iam.models import Role, User
+from app.modules.iam.models import Role, Tenant, User
 from app.modules.notify.service import notify
 from app.modules.org import service as org
 from app.modules.org.models import MemberRole
@@ -145,6 +145,50 @@ def get_alert(db: Session, user: User, alert_id: uuid.UUID) -> CrisisAlert:
     if students is not None and alert.student_id not in students:
         raise Forbidden("只能处理自己班学生的预警")
     return alert
+
+
+def moderation_page(
+    db: Session,
+    *,
+    tenant_id: uuid.UUID | None,
+    category: str | None,
+    crisis_only: bool,
+    page: int,
+    page_size: int,
+) -> tuple[list[tuple[ModerationLog, str]], int]:
+    """运营后台的内容安全记录（跨机构）：返回（记录，机构名）和总数。不带学生姓名。"""
+    stmt = select(ModerationLog, Tenant.name).join(Tenant, Tenant.id == ModerationLog.tenant_id)
+    if tenant_id:
+        stmt = stmt.where(ModerationLog.tenant_id == tenant_id)
+    if category:
+        stmt = stmt.where(ModerationLog.category == category)
+    if crisis_only:
+        stmt = stmt.where(ModerationLog.crisis != "none")
+    total = db.scalar(select(func.count()).select_from(stmt.subquery())) or 0
+    rows = db.execute(
+        stmt.order_by(ModerationLog.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+    ).all()
+    return [(log, name) for log, name in rows], total
+
+
+def alert_summary(db: Session) -> list[tuple[uuid.UUID, str, int, int, int, int]]:
+    """各机构的危机预警：（机构 ID，机构名，待处理，超时，已处理，高风险）。"""
+    deadline = datetime.now(UTC) - timedelta(hours=get_settings().crisis_escalate_hours)
+    is_open = CrisisAlert.status == AlertStatus.OPEN
+    rows = db.execute(
+        select(
+            Tenant.id,
+            Tenant.name,
+            func.count(case((is_open, 1))),
+            func.count(case((is_open & (CrisisAlert.created_at < deadline), 1))),
+            func.count(case((CrisisAlert.status == AlertStatus.HANDLED, 1))),
+            func.count(case((CrisisAlert.level == "high", 1))),
+        )
+        .join(Tenant, Tenant.id == CrisisAlert.tenant_id)
+        .group_by(Tenant.id, Tenant.name)
+        .order_by(func.count(case((is_open, 1))).desc(), Tenant.name)
+    ).all()
+    return [(tid, name, o, od, h, hi) for tid, name, o, od, h, hi in rows]
 
 
 def handle(alert: CrisisAlert, user: User, note: str) -> None:

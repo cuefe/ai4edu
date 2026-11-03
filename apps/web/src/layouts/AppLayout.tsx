@@ -1,24 +1,30 @@
 import {
   AlertOutlined,
   ApartmentOutlined,
+  AuditOutlined,
+  BarChartOutlined,
   BookOutlined,
   CloudServerOutlined,
   CreditCardOutlined,
+  DashboardOutlined,
   DownOutlined,
   EditOutlined,
   FileTextOutlined,
   FolderOpenOutlined,
+  GiftOutlined,
   HomeOutlined,
   LogoutOutlined,
   MenuOutlined,
   MessageOutlined,
   ReadOutlined,
   RobotOutlined,
+  SafetyCertificateOutlined,
   SnippetsOutlined,
   TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Space, Typography, type MenuProps } from "antd";
+import { Alert, Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Space, Typography, type MenuProps } from "antd";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useAuth } from "@/auth/AuthProvider";
@@ -26,6 +32,22 @@ import { ChangePasswordModal } from "@/components/ChangePasswordModal";
 import { NotificationBell } from "@/components/NotificationBell";
 
 type MenuItem = Required<MenuProps>["items"][number];
+
+/** 机构服务 30 天内到期时提醒机构管理员续费 */
+function ExpiryNotice({ expiresAt }: { expiresAt: string | null | undefined }) {
+  if (!expiresAt) return null;
+  const days = Math.ceil(dayjs(expiresAt).diff(dayjs(), "day", true));
+  if (days >= 30) return null;
+  return (
+    <Alert
+      type="warning"
+      showIcon
+      banner
+      style={{ marginBottom: 16 }}
+      title={`本机构的服务将于 ${dayjs(expiresAt).format("YYYY 年 M 月 D 日")}到期（还有 ${Math.max(days, 0)} 天），到期后所有账号都不能登录，请联系平台续费`}
+    />
+  );
+}
 
 export function AppLayout() {
   const { me, hasRole, logout } = useAuth();
@@ -43,7 +65,11 @@ export function AppLayout() {
       label: "平台运营",
       children: [
         { key: "/ops/tenants", icon: <CloudServerOutlined />, label: "机构管理" },
+        { key: "/ops/plans", icon: <GiftOutlined />, label: "套餐" },
+        { key: "/ops/usage", icon: <BarChartOutlined />, label: "AI 用量" },
         { key: "/ops/ai", icon: <RobotOutlined />, label: "AI 模型" },
+        { key: "/ops/safety", icon: <SafetyCertificateOutlined />, label: "内容安全" },
+        { key: "/ops/audit", icon: <AuditOutlined />, label: "审计日志" },
       ],
     });
   }
@@ -53,6 +79,7 @@ export function AppLayout() {
       type: "group",
       label: "机构管理",
       children: [
+        { key: "/org/overview", icon: <DashboardOutlined />, label: "机构概况" },
         { key: "/org/classes", icon: <ApartmentOutlined />, label: "班级" },
         { key: "/org/teachers", icon: <UserOutlined />, label: "老师" },
         { key: "/org/students", icon: <TeamOutlined />, label: "学生" },
@@ -188,6 +215,7 @@ export function AppLayout() {
           </Space>
         </Layout.Header>
         <Layout.Content style={{ padding: isMobile ? 16 : 24 }}>
+          {hasRole("org_admin") && <ExpiryNotice expiresAt={me?.tenant?.expires_at} />}
           <Outlet />
         </Layout.Content>
       </Layout>

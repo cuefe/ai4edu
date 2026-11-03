@@ -1,10 +1,11 @@
 import { PlusOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { App, Button, Form, Input, Modal, Popconfirm, Switch, Table, Tag } from "antd";
+import { App, Button, Form, Input, Modal, Popconfirm, Space, Switch, Table, Tag } from "antd";
 import { useState } from "react";
 import { api, unwrap, type Schemas } from "@/api/client";
 import { PageHead } from "@/components/PageHead";
 import { showPassword } from "@/components/showPassword";
+import { ToggleActive } from "./ToggleActive";
 
 type UserOut = Schemas["UserOut"];
 type TeacherIn = Schemas["TeacherIn"];
@@ -15,6 +16,8 @@ export function TeachersPage() {
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm<TeacherIn>();
 
+  const methods = useQuery({ queryKey: ["auth", "methods"], queryFn: async () => unwrap(await api.GET("/api/auth/methods")) });
+  const smsEnabled = methods.data?.sms ?? true;
   const teachers = useQuery({
     queryKey: ["org", "teachers"],
     queryFn: async () => unwrap(await api.GET("/api/org/teachers")),
@@ -67,14 +70,17 @@ export function TeachersPage() {
           { title: "状态", render: (_, u) => (u.active ? <Tag color="green">正常</Tag> : <Tag>停用</Tag>) },
           {
             title: "操作",
-            width: 120,
+            width: 160,
             render: (_, u) =>
               u.roles.includes("org_admin") ? null : (
-                <Popconfirm title={`重置 ${u.name} 的密码？`} onConfirm={() => reset.mutate(u)}>
-                  <Button type="link" size="small">
-                    重置密码
-                  </Button>
-                </Popconfirm>
+                <Space size={0}>
+                  <Popconfirm title={`重置 ${u.name} 的密码？`} onConfirm={() => reset.mutate(u)}>
+                    <Button type="link" size="small">
+                      重置密码
+                    </Button>
+                  </Popconfirm>
+                  <ToggleActive user={u} />
+                </Space>
               ),
           },
         ]}
@@ -105,8 +111,8 @@ export function TeachersPage() {
           <Form.Item
             name="password"
             label="初始密码"
-            extra="可不填，老师可以用手机验证码登录"
-            rules={[{ min: 6, message: "至少 6 位" }]}
+            extra={smsEnabled ? "可不填，老师可以用手机验证码登录" : "还没有开通短信登录，老师只能用密码登录"}
+            rules={[{ required: !smsEnabled, message: "请设置初始密码" }, { min: 6, message: "至少 6 位" }]}
           >
             <Input.Password autoComplete="new-password" />
           </Form.Item>

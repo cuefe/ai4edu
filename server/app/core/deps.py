@@ -2,10 +2,11 @@ import uuid
 from collections.abc import Callable
 
 import jwt
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.db import get_db, set_rls_context
 from app.core.errors import Forbidden, Unauthorized
 from app.core.security import decode_token
@@ -38,6 +39,8 @@ def get_current_user(
         raise Unauthorized("登录已失效，请重新登录")
     if not tid and not user.has_role(Role.PLATFORM_ADMIN):
         raise Unauthorized()
+    # 结束事务、归还连接：接口本身要重新排队等线程，排队时不能占着连接（见 core/routing.py）
+    db.commit()
     return user
 
 
@@ -48,6 +51,18 @@ def require_roles(*roles: Role) -> Callable[[User], User]:
         return user
 
     return checker
+
+
+def client_ip(request: Request) -> str:
+    """客户端 IP，只用于审计记录（可以伪造，不能拿来做权限判断）。
+
+    经过 CDN 时用 CLIENT_IP_HEADER 指定的请求头；否则用连接地址，反向代理传来的 X-Forwarded-For
+    由 uvicorn --proxy-headers 处理。
+    """
+    header = get_settings().client_ip_header
+    if header and (value := request.headers.get(header)):
+        return value.split(",")[0].strip()[:64]
+    return request.client.host if request.client else ""
 
 
 def tenant_of(user: User) -> uuid.UUID:

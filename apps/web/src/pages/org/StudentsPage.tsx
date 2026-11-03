@@ -1,10 +1,11 @@
 import { DownloadOutlined, InboxOutlined, PlusOutlined, UploadOutlined } from "@ant-design/icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Alert, App, Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Typography, Upload } from "antd";
+import { Alert, App, Button, Form, Input, Modal, Popconfirm, Select, Space, Table, Tag, Typography, Upload } from "antd";
 import { useState } from "react";
 import { ApiError, api, authFetch, downloadFile, saveBlob, unwrap, type Schemas } from "@/api/client";
 import { PageHead } from "@/components/PageHead";
 import { showPassword } from "@/components/showPassword";
+import { ToggleActive } from "./ToggleActive";
 
 type UserOut = Schemas["UserOut"];
 type ImportResult = Schemas["ImportResultOut"];
@@ -182,15 +183,19 @@ export function StudentsPage() {
         columns={[
           { title: "学号", dataIndex: "username" },
           { title: "姓名", dataIndex: "name" },
+          { title: "状态", dataIndex: "active", render: (a) => (a ? <Tag color="green">正常</Tag> : <Tag>停用</Tag>) },
           {
             title: "操作",
-            width: 120,
+            width: 160,
             render: (_, u) => (
-              <Popconfirm title={`重置 ${u.name} 的密码？`} onConfirm={() => reset.mutate(u)}>
-                <Button type="link" size="small">
-                  重置密码
-                </Button>
-              </Popconfirm>
+              <Space size={0}>
+                <Popconfirm title={`重置 ${u.name} 的密码？`} onConfirm={() => reset.mutate(u)}>
+                  <Button type="link" size="small">
+                    重置密码
+                  </Button>
+                </Popconfirm>
+                <ToggleActive user={u} />
+              </Space>
             ),
           },
         ]}

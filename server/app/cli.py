@@ -5,6 +5,7 @@ db-stop                停止本地开发数据库
 migrate                执行数据库迁移
 create-platform-admin  创建平台运营账号
 seed-demo              写入演示数据（仅开发环境）
+seed-load              写入压测数据（仅开发环境，见 app/devtools/loadtest.py）
 dev                    一键起本地开发环境：数据库、迁移、后端、前端（pnpm dev）
 dev-stop               结束残留的后端、前端进程和本地数据库（pnpm stop）
 openapi --out FILE     导出接口定义（前端生成类型用）
@@ -118,6 +119,18 @@ def seed_demo(_: argparse.Namespace) -> None:
     )
 
 
+def seed_load(args: argparse.Namespace) -> None:
+    """压测数据：一个机构、若干班、每班一份客观题作业（app/devtools/loadtest.py）。"""
+    if get_settings().is_prod:
+        sys.exit("生产环境不能写入压测数据")
+    from app.devtools import loadtest
+
+    if args.reset:
+        loadtest.reset()
+    else:
+        loadtest.seed(args.classes, args.per_class)
+
+
 def dev(args: argparse.Namespace) -> None:
     """pnpm dev：一键起本地开发环境，Ctrl+C 全部结束。"""
     from app.devtools import devrun
@@ -160,6 +173,11 @@ def main() -> None:
     p.add_argument("--password", required=True)
     p.set_defaults(func=create_platform_admin)
     sub.add_parser("seed-demo").set_defaults(func=seed_demo)
+    p = sub.add_parser("seed-load")
+    p.add_argument("--classes", type=int, default=12)
+    p.add_argument("--per-class", type=int, default=50)
+    p.add_argument("--reset", action="store_true", help="清掉压测学生的作答，再压一遍前用")
+    p.set_defaults(func=seed_load)
     sub.add_parser("dev").set_defaults(func=dev)
     sub.add_parser("dev-stop").set_defaults(func=dev_stop)
     p = sub.add_parser("openapi")

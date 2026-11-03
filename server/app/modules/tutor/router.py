@@ -9,12 +9,13 @@ from sqlalchemy.orm import Session
 
 from app.core.db import get_db
 from app.core.deps import require_roles, tenant_of
+from app.core.routing import DbRoute
 from app.modules.assignment import student as assignments
 from app.modules.iam.models import Role, User
 from app.modules.tutor import service
 from app.modules.tutor.service import MessageIn, SessionDetail, SessionIn, SessionOut
 
-router = APIRouter(prefix="/student/tutor", tags=["问一问"])
+router = APIRouter(route_class=DbRoute, prefix="/student/tutor", tags=["问一问"])
 
 Student = Depends(require_roles(Role.STUDENT))
 

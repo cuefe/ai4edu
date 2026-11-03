@@ -250,7 +250,9 @@ def test_export_and_delete(client, gateway):
     assert client.delete(f"/api/teacher/documents/{doc_id}", headers=teacher).json() == {"ok": True}
     assert client.get(f"/api/teacher/documents/{doc_id}", headers=teacher).status_code == 404
     with open_session(bypass=True) as db:
-        actions = db.scalars(select(AuditLog.action).order_by(AuditLog.created_at)).all()
+        actions = db.scalars(
+            select(AuditLog.action).where(AuditLog.action != "login").order_by(AuditLog.created_at)
+        ).all()
     assert actions == ["export_document", "delete_document"]
 
 
