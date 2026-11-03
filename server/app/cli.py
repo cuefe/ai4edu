@@ -5,6 +5,8 @@ db-stop                停止本地开发数据库
 migrate                执行数据库迁移
 create-platform-admin  创建平台运营账号
 seed-demo              写入演示数据（仅开发环境）
+dev                    一键起本地开发环境：数据库、迁移、后端、前端（pnpm dev）
+dev-stop               结束残留的后端、前端进程和本地数据库（pnpm stop）
 openapi --out FILE     导出接口定义（前端生成类型用）
 """
 
@@ -116,6 +118,27 @@ def seed_demo(_: argparse.Namespace) -> None:
     )
 
 
+def dev(args: argparse.Namespace) -> None:
+    """pnpm dev：一键起本地开发环境，Ctrl+C 全部结束。"""
+    from app.devtools import devrun
+
+    devrun.ensure_ports_free()
+    db_start(args)
+    try:
+        migrate(args)
+        devrun.run(SERVER_DIR.parent, SERVER_DIR)
+    finally:
+        db_stop(args)
+
+
+def dev_stop(args: argparse.Namespace) -> None:
+    """pnpm stop：结束残留的后端、前端进程和本地数据库。"""
+    from app.devtools import devrun
+
+    devrun.stop_port_owners()
+    db_stop(args)
+
+
 def export_openapi(args: argparse.Namespace) -> None:
     """导出接口定义，前端据此生成类型（pnpm gen:api）。"""
     from app.main import app
@@ -137,6 +160,8 @@ def main() -> None:
     p.add_argument("--password", required=True)
     p.set_defaults(func=create_platform_admin)
     sub.add_parser("seed-demo").set_defaults(func=seed_demo)
+    sub.add_parser("dev").set_defaults(func=dev)
+    sub.add_parser("dev-stop").set_defaults(func=dev_stop)
     p = sub.add_parser("openapi")
     p.add_argument("--out", required=True)
     p.set_defaults(func=export_openapi)

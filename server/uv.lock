@@ -43,6 +43,7 @@ dependencies = [
 dev = [
     { name = "fakeredis" },
     { name = "pgserver" },
+    { name = "psutil" },
     { name = "pytest" },
     { name = "ruff" },
 ]
@@ -81,6 +82,7 @@ requires-dist = [
 dev = [
     { name = "fakeredis", specifier = ">=2.40.0" },
     { name = "pgserver", specifier = ">=0.1.4" },
+    { name = "psutil", specifier = ">=7.2.2" },
     { name = "pytest", specifier = ">=9.2.0" },
     { name = "ruff", specifier = ">=0.17.3" },
 ]

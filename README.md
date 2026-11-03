@@ -45,6 +45,17 @@ refs/              竞品资料；refs/materials/ 是本地测试用的真实教
 
 需要：Python 3.12、[uv](https://docs.astral.sh/uv/)、Node.js 22+、pnpm。**不需要安装 PostgreSQL 和 Redis**：本地数据库用 `pgserver` 包自带的 PostgreSQL + pgvector，Redis 用内存版。
 
+在仓库根目录一条命令起停：
+
+```bash
+pnpm dev     # 起本地数据库、执行迁移、装依赖，在同一个终端里跑后端和前端（http://localhost:5173）；Ctrl+C 全部结束，包括数据库
+pnpm stop    # 结束残留的后端、前端和数据库：窗口被直接关掉，或 pnpm dev 提示端口被占用时用
+```
+
+第一次启动后，另开一个终端写入演示数据：`cd server && uv run python -m app.cli seed-demo`。Windows PowerShell 默认不允许运行脚本，`pnpm` 会报"禁止运行脚本"，执行一次 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` 即可。
+
+分步启动：
+
 ```bash
 # 后端
 cd server

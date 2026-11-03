@@ -36,6 +36,7 @@ dependencies = [
 dev = [
     "fakeredis>=2.40.0",
     "pgserver>=0.1.4",
+    "psutil>=7.2.2",
     "pytest>=9.2.0",
     "ruff>=0.17.3",
 ]

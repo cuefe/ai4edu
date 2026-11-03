@@ -3,6 +3,8 @@
   "private": true,
   "packageManager": "pnpm@12.16.1",
   "scripts": {
+    "dev": "cd server && uv run python -m app.cli dev",
+    "stop": "cd server && uv run python -m app.cli dev-stop",
     "dev:web": "pnpm --filter web dev",
     "build:web": "pnpm --filter web build",
     "typecheck": "pnpm --filter web typecheck",
