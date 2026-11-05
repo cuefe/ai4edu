@@ -14,11 +14,8 @@ server/.data/
 server/openapi.json
 .claude/launch.json
 
-# 大文件参考资料不进仓库
-refs/video/*.mp4
-refs/pdf/*.pdf
-# 测试用的真实教学资料和试卷：有版权，只在本地使用
-refs/materials/
+# 参考资料只在本地使用，不进仓库（含大文件、有版权的教学资料和试卷）
+refs/
 
 # 评测运行结果（模型输出，体积大且每次不同）
 evals/*/out/
