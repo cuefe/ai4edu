@@ -127,6 +127,7 @@ class SubmissionDetail(BaseModel):
 
 class StudentAssignmentBrief(BaseModel):
     id: uuid.UUID
+    kind: str = Field(description="normal 老师布置的作业 / weekly 周测")
     title: str
     subject: str
     teacher_name: str

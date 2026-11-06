@@ -34,3 +34,8 @@ def get(key: str) -> bytes:
 
 def delete(key: str) -> None:
     _path(key).unlink(missing_ok=True)
+
+
+def local_path(key: str) -> Path:
+    """本地文件路径，让大文件（课本 PDF）能按 Range 分段返回，不用整个读进内存。换 OSS 后改成签名地址。"""
+    return _path(key)

@@ -3,6 +3,7 @@
 import asyncio
 import logging
 import uuid
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 
@@ -14,6 +15,7 @@ from app.core.db import session_scope
 from app.core.errors import AppError
 from app.modules.assignment.models import Answer, AnswerStatus, Assignment, AssignmentItem, Submission
 from app.modules.assignment.service import refresh_submission
+from app.modules.learning import service as learning
 from app.workers.celery_app import celery_app
 
 log = logging.getLogger(__name__)
@@ -36,7 +38,7 @@ async def run_grading(submission_id: uuid.UUID, gateway: AIGateway) -> None:
         if row is None:
             return
         sub, subject = row
-        tenant_id, student_id = sub.tenant_id, sub.student_id
+        tenant_id, student_id, submitted_at = sub.tenant_id, sub.student_id, sub.submitted_at
         jobs = [
             (answer.id, dict(item.content), item.score, answer.response, list(answer.images))
             for answer, item in db.execute(
@@ -78,6 +80,17 @@ async def run_grading(submission_id: uuid.UUID, gateway: AIGateway) -> None:
             else:
                 answer.ai_score, answer.ai_confidence = result.score, result.confidence
                 answer.ai_points, answer.ai_comment = result.points, result.comment
+                if full:  # 周测的题先按 AI 给的分算掌握度，老师确认时覆盖
+                    learning.record_evidence(
+                        db,
+                        tenant_id=tenant_id,
+                        student_id=student_id,
+                        subject=subject,
+                        item_id=answer.item_id,
+                        kp_ids=question.get("kp_ids") or [],
+                        ratio=result.score / full,
+                        at=submitted_at or datetime.now(UTC),
+                    )
 
     await asyncio.gather(*(grade(*job) for job in jobs))
     with session_scope(tenant_id=tenant_id) as db:

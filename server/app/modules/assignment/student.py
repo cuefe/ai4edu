@@ -99,6 +99,7 @@ def list_for_student(
     return [
         StudentAssignmentBrief(
             id=a.id,
+            kind=a.kind,
             title=a.title,
             subject=a.subject,
             teacher_name=teacher,
@@ -124,6 +125,7 @@ def detail(db: Session, a: Assignment, sub: Submission) -> StudentAssignment:
     recite_items = [i.id for i in items if i.item_type == ItemType.RECITE]
     return StudentAssignment(
         id=a.id,
+        kind=a.kind,
         title=a.title,
         subject=a.subject,
         teacher_name=teacher,

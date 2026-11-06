@@ -6,7 +6,7 @@
 - 试点上线清单：[docs/试点上线清单.md](docs/试点上线清单.md)
 - 压测记录：[docs/压测记录.md](docs/压测记录.md)
 
-当前进度：**M3 收尾**已完成，MVP 的闭环（老师备课出题 → 布置 → 学生学习、背诵、做题、问一问 → 批改 → 错题本 → 作业报告）已跑通，运营后台、额度、安全加固和压测也做完了。下一步：按[试点上线清单](docs/试点上线清单.md)部署，进 1–2 所种子学校或机构试点。
+当前进度：**M3 收尾**已完成，MVP 的闭环（老师备课出题 → 布置 → 学生学习、背诵、做题、问一问 → 批改 → 错题本 → 作业报告）已跑通，运营后台、额度、安全加固和压测也做完了。**M4 课程内容**进行中：教材、章节、知识点、思维导图的公共内容层和生成流程已做好，人教版九上数学打样；下一步是铺量（初一至高三）和每周个性化试卷。
 - M0：账号与登录、机构/班级/师生管理、Excel 批量导入学生、跨机构数据隔离、模型网关与用量统计。
 - M1 **AI 生成教案**：填课题流式生成，在线编辑（表格、公式），自动保存，导出 Word（公式是 Word 原生公式）。
 - M1 **资料库**：上传 PDF、Word、PPT、图片，自动解析（扫描件和图片用通义 OCR 识别），切片段、向量化；生成时按课题检索，正文标注引用并附出处；资料可共享给本机构老师。
@@ -27,6 +27,7 @@
 - M3 **安全加固**：登录、登录失败写审计日志（含 IP）；验证码每个手机号每天最多 10 条；没开通短信时（`SMS_PROVIDER=none`）只能密码登录、建老师账号必须设密码；Nginx 加 CSP 等安全响应头；密码哈希改用 OWASP 建议参数并限制并发（全班同时登录不会把内存用光），旧哈希登录时自动升级；生产模式启动时检查短信、Redis、CORS 配置。
 - M3 **压测**：`app/devtools/loadtest.py` 模拟全校学生做作业、老师看报告。找到并修好了 300 人同时在线时服务卡死的问题（数据库连接池和线程池互相等待）；2 个 API 进程时 600 名学生同时做作业，各接口 p95 在 100 ms 以内，见[压测记录](docs/压测记录.md)。
 - M3 **备份**：`deploy/backup.sh` 每天备份数据库和上传的文件，保留 14 天，注释里有恢复步骤。
+- M4 **课程内容**：学生、老师按年级和学科看教材，每章每节有知识点（标出核心、重点和要背的）、思维导图（公式正常显示，可折叠）、课件，也能在线看课本 PDF（大文件分段加载）。内容是平台公共内容，所有机构共用；导入后默认是草稿，运营在「教材内容」里抽检后发布。学生首页加了课程和拍题入口。见下面的[生产课程内容](#生产课程内容)。
 
 ## 目录
 
@@ -36,7 +37,7 @@ server/            后端（FastAPI + SQLAlchemy + Celery）
   app/core/        配置、数据库与租户隔离、认证
   app/modules/     业务模块：iam 账号、org 机构班级、content 教案和讲义、recite 背诵卡片、qbank 题库、library 资料库、
                    assignment 作业和批改、learning 错题本和背诵复习、tutor 问一问、safety 内容安全和危机预警、
-                   notify 站内信、ops 运营
+                   notify 站内信、ops 运营、curriculum 教材章节知识点（平台公共内容）
   app/ai/gateway/  模型网关；models.yaml 配置技能 → 模型路由
   app/ai/skills/   AI 技能：每个技能一个目录（输入结构、prompt、输出检查）
   app/ai/parsing/  资料解析：PDF、Word、PPT、图片 → 文本块 → 检索片段
@@ -107,6 +108,55 @@ cd server && uv run python -m app.cli db-stop
 
 模型路由和价格在 `server/app/ai/gateway/models.yaml` 里配置。
 
+### 生产课程内容
+
+一册教材一个内容包（JSON），离线生成后用命令导入。大纲、资料和生成结果放在 `refs/` 下，不进仓库。
+
+```bash
+cd server
+# 1. 按大纲生成：默认调本机 Codex（用登录的 ChatGPT 会员额度）；--engine gateway 走模型网关（默认 DeepSeek，按量计费）
+#    --sources 指定资料目录，文件路径里带章名的算这一章的资料（支持 pptx、pdf、docx、txt、md）。已生成的章不会重做，--force 重做
+uv run python -m app.cli content-gen ../refs/packs/rj-math-9a/outline.json
+
+# 2. 导入：默认是草稿，只有运营能看到。可以重复导入，按编号和名称更新，ID 不变
+uv run python -m app.cli content-import ../refs/packs/rj-math-9a/pack.json
+
+# 3. 抽检后在「平台运营 → 教材内容」发布，或用命令行。整册删除连同文件一起删
+uv run python -m app.cli content-publish rj-math-9a
+uv run python -m app.cli content-remove rj-math-9a
+```
+
+大纲的格式见 `app/modules/curriculum/pack.py` 的 `BookPack`。课本和课件写在内容包的 `files` 里；网页只能显示 PDF，PPT 要先转成 PDF。大纲的章节要照课本目录写，不要凭印象写。
+
+课本是扫描版（没有文字层）时，生成之前先把原文转写出来：
+
+```bash
+cd server
+# 逐页转写成 Markdown，存成 ocr/p-<PDF 页码>.md。走本机 Codex，已转写的页不会重做
+uv run python -m app.cli content-ocr ../refs/materials/pan/数学九上/课本.pdf ../refs/packs/rj-math-9a/ocr --pages 7-182
+```
+
+再在大纲旁边放一个 `scan.json`（格式见 `app/devtools/content_gen.py` 的 `ScanIndex`），写明各章各节从书上第几页开始。`content-gen` 看到它就把原文按节分好交给模型；有页还没转写时，这一章不生成并报错。
+
+### 每周周测
+
+每个学生每门课每周一份不同的卷子，上一份的得分决定这一份的难度。规则在 `app/modules/weekly/compose.py`：约 70% 考本周内容、20% 考薄弱知识点、10% 考错题的同类题；得分 85% 及以上升一档，低于 60% 降一档。题目只从审核通过的平台题库里抽。
+
+```bash
+cd server
+# 1. 按课本原文出题，每节 26 道，再由另一个 Codex 进程不看答案独立解一遍。结果存盘，中途失败重跑只补缺的
+uv run python -m app.cli pool-gen ../refs/packs/rj-math-9a
+
+# 2. 导入题库。重复导入时，审核过或改过的题不会被覆盖
+uv run python -m app.cli pool-import ../refs/packs/rj-math-9a/questions.json
+
+# 3. 在「平台运营 → 教材内容 → 题库」审核，通过的题才会进卷。“校验一致”不等于题目没问题，要学科老师抽查
+```
+
+交卷后马上能看到分数和对错，答案和解析截止后才公布；单选题的选项按学生打乱，答案跟着换（解析提到选项字母的题除外）。
+
+老师在「周测」页面设置这周教的节，就算给这个班开启了周测。定时任务周四 18:00 提醒没更新进度的老师，周五 16:00 发卷，周日 22:00 截止（`app/workers/celery_app.py` 的 `beat_schedule`）。本地开发没有定时进程，在页面上点「现在发卷」，或者运行 `uv run python -m app.cli weekly-run`。
+
 ## 关键约定
 
 - **租户隔离两层保护**：应用层查询必须带 `tenant_id`；数据库层所有带 `tenant_id` 的表开启了行级安全（RLS），应用使用非超级用户账号连接。新建带 `tenant_id` 的表时，在迁移里调用 `migrations/rls.py` 的 `enable_tenant_rls`。
@@ -119,7 +169,7 @@ cd server && uv run python -m app.cli db-stop
 
 ## 部署
 
-`deploy/docker-compose.yml` 可一键起试点环境（数据库、Redis、API、Worker、Web）：复制 `deploy/.env.example` 为 `deploy/.env` 填写后 `docker compose up -d --build`。生产环境数据库和 Redis 用云托管服务，`ENV=prod` 时后端会检查密钥、Redis、短信、CORS 配置。完整步骤（开通学校、备份、监控、合规）见[试点上线清单](docs/试点上线清单.md)。
+`deploy/docker-compose.yml` 可一键起试点环境（数据库、Redis、API、Worker、定时任务 Beat、Web，Beat 全局只能有一个）：复制 `deploy/.env.example` 为 `deploy/.env` 填写后 `docker compose up -d --build`。生产环境数据库和 Redis 用云托管服务，`ENV=prod` 时后端会检查密钥、Redis、短信、CORS 配置。完整步骤（开通学校、备份、监控、合规）见[试点上线清单](docs/试点上线清单.md)。
 
 ## 与技术方案的差异
 
@@ -133,7 +183,12 @@ cd server && uv run python -m app.cli db-stop
 - 检索只用向量（通义 `text-embedding-v4`）加字面重合加分，没用 zhparser 关键词检索和重排模型；向量没建 HNSW 索引（按机构、老师过滤后数据量小，精确计算更准）。换向量模型后要重新解析资料。
 - 本地开发没有 Celery Worker，资料解析、出题校验在 API 进程的后台线程里跑（`app/workers/dispatch.py`）；配了 Redis 时进 Celery 队列。
 - 背诵卡片单独一个模块 `recite`（方案里归在 `content`），多了卡片组表 `recite_deck`：M2 布置背诵任务时按卡片组布置。抽取卡片几十秒就能完成，在请求里同步执行。
-- 题目的知识点暂时是文字标签，没有 `question_kp` 关联表：知识点树（`curriculum` 模块）还没做。
+- 题目分两处：老师自己的题在 `question`（带 `tenant_id`，知识点仍是文字标签）；周测用的是平台公共题库 `pool_question`，通过 `pool_question_kp` 关联到知识点。没有合并成一张表，因为前者归老师和机构所有，后者是平台内容，审核流程也不同。
+- 掌握度（方案里是 P1 的 `analytics`）先放在 `learning`：不存汇总值，存每题每知识点的得分（`kp_evidence`），读取时按时间衰减算。这样老师改分时直接覆盖，不会重复计入。
+- 周测没有单独的作答表：每份周测是一份只发给一个学生的作业（`assignment.kind = weekly`），负责人是设置进度的老师，提交、判分、AI 批改、老师确认、错题本都走作业的流程。周测进行中不能问 AI，而且现有规则是作业没提交、没截止前“问一问”整体关闭，所以学生交卷前都问不了 AI。
+- 周测的题不依赖插图：课本里要看图才能做的题，能用文字说清就改写，否则不收。没有存题目配图。
+- `curriculum` 模块简化了方案里的表：没有单独的 `subject`、`textbook_edition`，学科和版本是 `textbook` 的字段；章和节都在 `chapter`（`parent_id` 区分）；知识点直接挂在节上，没有 `chapter_kp`。这些表是平台公共内容，不带 `tenant_id`，机构还不能挂自己的补充节点。
+- 课程视频不进平台：网盘里的网课单个视频 30～130MB，一章就有约 750MB，要等有对象存储和 CDN 再说。
 - 答案校验没用 SymPy：推理模型独立求解后，先按规则比对（选项字母、对错、文字），再用受限的算式求值器做数值比对（`ai/skills/answer_check/compare.py`，能判断 1/2 和 0.5、2(x+1) 和 2x+2 等价，不执行任意代码），判断不了的交给模型比对。
 - 2026-11 实测 DeepSeek 的 `deepseek-chat`、`deepseek-reasoner` 都由 `deepseek-flash` 提供，出题用的就是它；校验首选 `deepseek-v4-pro`，和出题模型不同，错误不容易重合（`models.yaml` 的 reasoning 档）。
 - 作业的题目、讲义、卡片在布置时存快照（`assignment_item.content`），之后题库、讲义再改，已布置的作业不变。没有单独的 `assignment_target` 表：布置时直接给每个学生建一条 `submission`，班级 ID 记在作业上。

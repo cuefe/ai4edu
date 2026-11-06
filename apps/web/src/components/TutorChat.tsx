@@ -2,6 +2,7 @@ import { CameraOutlined, CloseCircleFilled, PhoneOutlined, SendOutlined } from "
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, App, Button, Collapse, Input, Space, Spin, Tag, Typography, Upload } from "antd";
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import { ApiError, api, authFetch, unwrap, type Schemas } from "@/api/client";
 import { postSSE } from "@/api/sse";
 import { MarkdownView } from "./MarkdownView";
@@ -50,6 +51,16 @@ export function TutorChat({ sessionId }: { sessionId: string }) {
   const [busy, setBusy] = useState(false);
   const [crisis, setCrisis] = useState<string[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLDivElement>(null);
+  const [params, setParams] = useSearchParams();
+  const wantCamera = params.get("camera") === "1" && Boolean(detail.data);
+
+  // 从首页“拍题”进来时直接打开选图或拍照（浏览器不允许时，学生点相机按钮即可）
+  useEffect(() => {
+    if (!wantCamera) return;
+    inputRef.current?.querySelector<HTMLInputElement>('input[type="file"]')?.click();
+    setParams({}, { replace: true });
+  }, [wantCamera, setParams]);
 
   useEffect(() => {
     if (detail.data) {
@@ -187,7 +198,7 @@ export function TutorChat({ sessionId }: { sessionId: string }) {
           ))}
         </Space>
       )}
-      <div className="tutor-input">
+      <div ref={inputRef} className="tutor-input">
         <Upload
           accept="image/*"
           showUploadList={false}

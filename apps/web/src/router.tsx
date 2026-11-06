@@ -5,8 +5,10 @@ import { AuthProvider } from "./auth/AuthProvider";
 import { HomeRedirect, RequireAuth, RequireRole } from "./auth/guards";
 import { AppLayout } from "./layouts/AppLayout";
 import { LoginPage } from "./pages/LoginPage";
+import { CoursesPage } from "./pages/course/CoursesPage";
 import { AiPage } from "./pages/ops/AiPage";
 import { AuditPage } from "./pages/ops/AuditPage";
+import { CoursesAdminPage } from "./pages/ops/CoursesAdminPage";
 import { PlansPage } from "./pages/ops/PlansPage";
 import { SafetyPage } from "./pages/ops/SafetyPage";
 import { TenantsPage } from "./pages/ops/TenantsPage";
@@ -48,6 +50,11 @@ const ReviewPage = lazy(() => import("./pages/student/ReviewPage").then((m) => (
 const WrongBookPage = lazy(() => import("./pages/student/WrongBookPage").then((m) => ({ default: m.WrongBookPage })));
 const WrongItemPage = lazy(() => import("./pages/student/WrongBookPage").then((m) => ({ default: m.WrongItemPage })));
 const TutorPage = lazy(() => import("./pages/student/TutorPage").then((m) => ({ default: m.TutorPage })));
+const CourseBookPage = lazy(() => import("./pages/course/CourseBookPage").then((m) => ({ default: m.CourseBookPage })));
+const PoolQuestionsPage = lazy(() => import("./pages/ops/PoolQuestionsPage").then((m) => ({ default: m.PoolQuestionsPage })));
+const WeeklyPage = lazy(() => import("./pages/teacher/WeeklyPage").then((m) => ({ default: m.WeeklyPage })));
+const WeeklyReportPage = lazy(() => import("./pages/teacher/WeeklyReportPage").then((m) => ({ default: m.WeeklyReportPage })));
+const StudentWeeklyPage = lazy(() => import("./pages/student/StudentWeeklyPage").then((m) => ({ default: m.StudentWeeklyPage })));
 
 function Lazy({ children }: { children: ReactNode }) {
   return <Suspense fallback={<Spin style={{ display: "block", marginTop: 96 }} />}>{children}</Suspense>;
@@ -97,6 +104,9 @@ export const router = createBrowserRouter([
               { path: "ai", element: <AiPage /> },
               { path: "safety", element: <SafetyPage /> },
               { path: "audit", element: <AuditPage /> },
+              { path: "courses", element: <CoursesAdminPage /> },
+              lazyRoute("courses/:bookId", <CourseBookPage base="/ops/courses" />),
+              lazyRoute("courses/:bookId/questions", <PoolQuestionsPage />),
             ],
           },
           {
@@ -125,9 +135,13 @@ export const router = createBrowserRouter([
               lazyRoute("questions", <QuestionsPage />),
               lazyRoute("questions/new", <QuestionGenPage />),
               { path: "resources", element: <ResourcesPage /> },
+              { path: "courses", element: <CoursesPage base="/teacher/courses" /> },
+              lazyRoute("courses/:bookId", <CourseBookPage base="/teacher/courses" />),
               { path: "assignments", element: <AssignmentsPage /> },
               lazyRoute("assignments/new", <AssignmentNewPage />),
               lazyRoute("assignments/:id", <AssignmentReportPage />),
+              lazyRoute("weekly", <WeeklyPage />),
+              lazyRoute("weekly/:classId", <WeeklyReportPage />),
             ],
           },
           {
@@ -140,8 +154,11 @@ export const router = createBrowserRouter([
             element: <RequireRole roles={["student"]} />,
             children: [
               { index: true, element: <StudentHome /> },
+              { path: "courses", element: <CoursesPage base="/student/courses" /> },
+              lazyRoute("courses/:bookId", <CourseBookPage base="/student/courses" />),
               { path: "assignments", element: <StudentAssignmentsPage /> },
               lazyRoute("assignments/:id", <StudentAssignmentPage />),
+              lazyRoute("weekly", <StudentWeeklyPage />),
               lazyRoute("review", <ReviewPage />),
               lazyRoute("wrong", <WrongBookPage />),
               lazyRoute("wrong/:id", <WrongItemPage />),

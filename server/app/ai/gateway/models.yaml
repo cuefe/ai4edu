@@ -50,6 +50,7 @@ skills:
   lesson_plan: flagship
   handout: flagship
   recite_cards: standard
+  curriculum_gen: flagship # 离线生成教材的知识点和思维导图（平台内容，不计入机构额度）
   question_gen: flagship
   answer_check: reasoning # 独立求解，核对题目答案
   answer_judge: standard # 比对两个答案是否一致、说明分歧

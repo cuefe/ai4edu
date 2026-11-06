@@ -47,6 +47,15 @@ from app.modules.iam.models import Role, Tenant  # noqa: E402
 
 TABLES = ", ".join(
     [
+        "kp_evidence",
+        "weekly_paper",
+        "class_progress",
+        "pool_question_kp",
+        "pool_question",
+        "course_file",
+        "knowledge_point",
+        "chapter",
+        "textbook",
         "review_log",
         "review_state",
         "wrong_item",

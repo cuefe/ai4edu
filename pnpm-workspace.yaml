@@ -1,2 +1,6 @@
 packages:
   - apps/*
+
+overrides:
+  # 全项目只用一个 KaTeX 版本。rehype-katex 自带的旧版输出的 class 和新版样式表对不上，≠ 这类符号会错位
+  katex: 0.18.10

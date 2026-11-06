@@ -4,8 +4,16 @@ from app.ai.models import AiUsage
 from app.core.db import Base
 from app.modules.assignment.models import Answer, Assignment, AssignmentItem, Submission
 from app.modules.content.models import Document
+from app.modules.curriculum.models import (
+    Chapter,
+    CourseFile,
+    KnowledgePoint,
+    PoolQuestion,
+    PoolQuestionKp,
+    Textbook,
+)
 from app.modules.iam.models import Tenant, User
-from app.modules.learning.models import ReviewLog, ReviewState, WrongItem
+from app.modules.learning.models import KpEvidence, ReviewLog, ReviewState, WrongItem
 from app.modules.library.models import Resource, ResourceChunk
 from app.modules.notify.models import Notification
 from app.modules.ops.models import AuditLog, Plan
@@ -14,6 +22,7 @@ from app.modules.qbank.models import Question, QuestionBatch, QuestionCheck
 from app.modules.recite.models import ReciteCard, ReciteDeck
 from app.modules.safety.models import CrisisAlert, ModerationLog
 from app.modules.tutor.models import ChatMessage, ChatSession
+from app.modules.weekly.models import ClassProgress, WeeklyPaper
 
 __all__ = [
     "AiUsage",
@@ -23,15 +32,22 @@ __all__ = [
     "AuditLog",
     "Base",
     "Campus",
+    "Chapter",
     "ChatMessage",
     "ChatSession",
     "ClassMember",
+    "ClassProgress",
+    "CourseFile",
     "CrisisAlert",
     "Document",
     "Klass",
+    "KnowledgePoint",
+    "KpEvidence",
     "ModerationLog",
     "Notification",
     "Plan",
+    "PoolQuestion",
+    "PoolQuestionKp",
     "Question",
     "QuestionBatch",
     "QuestionCheck",
@@ -43,6 +59,8 @@ __all__ = [
     "ReviewState",
     "Submission",
     "Tenant",
+    "Textbook",
     "User",
+    "WeeklyPaper",
     "WrongItem",
 ]

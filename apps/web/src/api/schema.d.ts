@@ -1609,6 +1609,312 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 教材目录：学生、老师看已发布的，运营还能看到草稿 */
+        get: operations["catalog_api_courses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/chapters/{chapter_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 一章或一节的知识点、思维导图、课件 */
+        get: operations["chapter_api_courses_chapters__chapter_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/files/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 课本、课件文件（支持 Range 分段读取） */
+        get: operations["course_file_api_courses_files__file_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/questions/{qid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 修改题库里的题 */
+        put: operations["update_pool_question_api_courses_questions__qid__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/questions/{qid}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 审核通过：可以进周测 */
+        post: operations["approve_pool_question_api_courses_questions__qid__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/questions/{qid}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 驳回 */
+        post: operations["reject_pool_question_api_courses_questions__qid__reject_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{book_id}/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 题库审核列表，有分歧的排最前面 */
+        get: operations["pool_questions_api_courses__book_id__questions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{book_id}/questions/approve-checked": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 把自动校验一致的题一次通过（有分歧的还要逐题看） */
+        post: operations["approve_checked_api_courses__book_id__questions_approve_checked_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{book_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 一册教材的章节目录和文件 */
+        get: operations["book_api_courses__book_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/courses/{book_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 发布或下架一册教材（平台运营） */
+        put: operations["set_status_api_courses__book_id__status_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/weekly": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我任教的班级的周测情况 */
+        get: operations["my_classes_api_teacher_weekly_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/weekly/books/{book_id}/sections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 一册教材的节和每节可用的题数 */
+        get: operations["sections_api_teacher_weekly_books__book_id__sections_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/weekly/classes/{klass_id}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 设置这周教到哪里 */
+        put: operations["set_progress_api_teacher_weekly_classes__klass_id__progress_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/weekly/classes/{klass_id}/issue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 现在发这周的周测 */
+        post: operations["issue_api_teacher_weekly_classes__klass_id__issue_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/weekly/classes/{klass_id}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 全班某一周的周测成绩 */
+        get: operations["report_api_teacher_weekly_classes__klass_id__report_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/weekly/classes/{klass_id}/grading": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 全班周测待确认的批改 */
+        get: operations["grading_api_teacher_weekly_classes__klass_id__grading_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/teacher/weekly/classes/{klass_id}/confirm-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 全班周测 AI 已批改的题按 AI 给分确认 */
+        post: operations["confirm_all_api_teacher_weekly_classes__klass_id__confirm_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/student/weekly": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 我的周测：各科成绩、难度和薄弱知识点 */
+        get: operations["my_weekly_api_student_weekly_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1779,6 +2085,14 @@ export interface components {
          * @enum {string}
          */
         AnswerRelease: "submit" | "due";
+        /** ApproveCheckedIn */
+        ApproveCheckedIn: {
+            /**
+             * Section Id
+             * @description 只通过这一节的；为空表示整册
+             */
+            section_id?: string | null;
+        };
         /** AssignmentBrief */
         AssignmentBrief: {
             /**
@@ -2018,6 +2332,94 @@ export interface components {
             /** File */
             file: string;
         };
+        /** BookBrief */
+        BookBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Stage */
+            stage: string;
+            /** Subject */
+            subject: string;
+            /** Edition */
+            edition: string;
+            /** Grade */
+            grade: string;
+            /** Title */
+            title: string;
+            /** Status */
+            status: string;
+            /**
+             * Chapter Count
+             * @default 0
+             */
+            chapter_count: number;
+            /**
+             * Section Count
+             * @default 0
+             */
+            section_count: number;
+            /**
+             * Kp Count
+             * @default 0
+             */
+            kp_count: number;
+            /**
+             * File Count
+             * @default 0
+             */
+            file_count: number;
+        };
+        /** BookDetail */
+        BookDetail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Stage */
+            stage: string;
+            /** Subject */
+            subject: string;
+            /** Edition */
+            edition: string;
+            /** Grade */
+            grade: string;
+            /** Title */
+            title: string;
+            /** Status */
+            status: string;
+            /**
+             * Chapter Count
+             * @default 0
+             */
+            chapter_count: number;
+            /**
+             * Section Count
+             * @default 0
+             */
+            section_count: number;
+            /**
+             * Kp Count
+             * @default 0
+             */
+            kp_count: number;
+            /**
+             * File Count
+             * @default 0
+             */
+            file_count: number;
+            /** Chapters */
+            chapters: components["schemas"]["ChapterBrief"][];
+            /** Files */
+            files: components["schemas"]["FileOut"][];
+        };
         /** BulkReviewIn */
         BulkReviewIn: {
             /** Ids */
@@ -2092,12 +2494,65 @@ export interface components {
              */
             id: string;
         };
+        /** Catalog */
+        Catalog: {
+            /** My Grades */
+            my_grades: string[];
+            /** Books */
+            books: components["schemas"]["BookBrief"][];
+        };
         /** ChangePasswordIn */
         ChangePasswordIn: {
             /** Old Password */
             old_password: string;
             /** New Password */
             new_password: string;
+        };
+        /** ChapterBrief */
+        ChapterBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** No */
+            no: string;
+            /** Title */
+            title: string;
+            /**
+             * Kp Count
+             * @default 0
+             */
+            kp_count: number;
+            /**
+             * Sections
+             * @default []
+             */
+            sections: components["schemas"]["SectionBrief"][];
+        };
+        /** ChapterDetail */
+        ChapterDetail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Book Id
+             * Format: uuid
+             */
+            book_id: string;
+            /** No */
+            no: string;
+            /** Title */
+            title: string;
+            /** Summary */
+            summary: string;
+            mind_map: components["schemas"]["MindNode"] | null;
+            /** Knowledge Points */
+            knowledge_points: components["schemas"]["KpOut"][];
+            /** Files */
+            files: components["schemas"]["FileOut"][];
         };
         /** CheckOut */
         CheckOut: {
@@ -2180,6 +2635,56 @@ export interface components {
             /** Campus Id */
             campus_id?: string | null;
         };
+        /** ClassWeekReport */
+        ClassWeekReport: {
+            /**
+             * Klass Id
+             * Format: uuid
+             */
+            klass_id: string;
+            /** Class Name */
+            class_name: string;
+            /** Subject */
+            subject: string;
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /**
+             * Weeks
+             * @description 有周测的周，新的在前
+             */
+            weeks: string[];
+            /** Rows */
+            rows: components["schemas"]["StudentWeekRow"][];
+            /**
+             * Class Weak Kps
+             * @description 全班平均掌握度最低的知识点
+             */
+            class_weak_kps: components["schemas"]["KpMastery"][];
+        };
+        /** ClassWeeklyOut */
+        ClassWeeklyOut: {
+            /**
+             * Klass Id
+             * Format: uuid
+             */
+            klass_id: string;
+            /** Class Name */
+            class_name: string;
+            /** Grade */
+            grade: string | null;
+            /**
+             * Subject
+             * @description 老师在这个班教的学科；没有填时由所选教材决定
+             */
+            subject: string | null;
+            /** Student Count */
+            student_count: number;
+            progress: components["schemas"]["ProgressOut"] | null;
+            week: components["schemas"]["WeekStat"] | null;
+        };
         /** ConfirmIn */
         ConfirmIn: {
             /**
@@ -2189,14 +2694,6 @@ export interface components {
             score?: number | null;
             /** Comment */
             comment?: string | null;
-        };
-        /** CountOut */
-        CountOut: {
-            /**
-             * Count
-             * @description 处理了几条
-             */
-            count: number;
         };
         /** Credential */
         Credential: {
@@ -2409,6 +2906,26 @@ export interface components {
              */
             version: number;
         };
+        /** FileOut */
+        FileOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Title */
+            title: string;
+            /** Filename */
+            filename: string;
+            /** Mime */
+            mime: string;
+            /** Size */
+            size: number;
+            /** Chapter Id */
+            chapter_id: string | null;
+        };
         /** GradingRow */
         GradingRow: {
             /**
@@ -2543,6 +3060,39 @@ export interface components {
             /** Credentials */
             credentials: components["schemas"]["Credential"][];
         };
+        /** IssueResult */
+        IssueResult: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /**
+             * Created
+             * @description 这次发了几份
+             */
+            created: number;
+            /**
+             * Existing
+             * @description 这周已经发过的份数，不会重复发
+             */
+            existing: number;
+            /**
+             * Short
+             * @description 题库不够、这次没发成的学生
+             */
+            short: string[];
+            /**
+             * Partial
+             * @description 题库不够、卷子题目偏少的学生
+             */
+            partial: string[];
+            /**
+             * Stale Progress
+             * @description 进度这周没更新，用的是上次设置的节
+             */
+            stale_progress: boolean;
+        };
         /** ItemIn */
         ItemIn: {
             item_type: components["schemas"]["ItemType"];
@@ -2611,6 +3161,51 @@ export interface components {
          * @enum {string}
          */
         ItemType: "question" | "document" | "recite";
+        /** KpMastery */
+        KpMastery: {
+            /**
+             * Kp Id
+             * Format: uuid
+             */
+            kp_id: string;
+            /** Name */
+            name: string;
+            /** Section No */
+            section_no: string;
+            /**
+             * Mastery
+             * @description 掌握度，0～1
+             */
+            mastery: number;
+        };
+        /** KpOut */
+        KpOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Content */
+            content: string;
+            /** Kind */
+            kind: string;
+            /** Importance */
+            importance: string;
+            /** Recite */
+            recite: boolean;
+            /**
+             * Section No
+             * @default
+             */
+            section_no: string;
+            /**
+             * Section Title
+             * @default
+             */
+            section_title: string;
+        };
         /** LessonPlanIn */
         LessonPlanIn: {
             /**
@@ -2750,6 +3345,16 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** MindNode */
+        MindNode: {
+            /** Text */
+            text: string;
+            /**
+             * Children
+             * @default []
+             */
+            children: components["schemas"]["MindNode"][];
         };
         /** ModerationPage */
         ModerationPage: {
@@ -2931,6 +3536,152 @@ export interface components {
              * @default 0
              */
             tenant_count: number;
+        };
+        /** PoolPage */
+        PoolPage: {
+            /** Items */
+            items: components["schemas"]["PoolQuestionOut"][];
+            /**
+             * Total
+             * @description 符合筛选条件的总数
+             */
+            total: number;
+            /**
+             * Counts
+             * @description 这册书各状态的题数
+             */
+            counts: {
+                [key: string]: number;
+            };
+        };
+        /**
+         * PoolQuestionIn
+         * @description 运营修改题目。
+         */
+        PoolQuestionIn: {
+            /**
+             * Qtype
+             * @enum {string}
+             */
+            qtype: "单选题" | "多选题" | "判断题" | "填空题" | "解答题";
+            /** Stem */
+            stem: string;
+            /** Options */
+            options?: string[];
+            /** Answer */
+            answer: string;
+            /**
+             * Analysis
+             * @default
+             */
+            analysis: string;
+            /** Knowledge Points */
+            knowledge_points?: string[];
+            /**
+             * Difficulty
+             * @enum {string}
+             */
+            difficulty: "容易" | "中等" | "较难";
+        };
+        /** PoolQuestionOut */
+        PoolQuestionOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Section Id
+             * Format: uuid
+             */
+            section_id: string;
+            /** Section No */
+            section_no: string;
+            /** Section Title */
+            section_title: string;
+            /** Qtype */
+            qtype: string;
+            /** Difficulty */
+            difficulty: string;
+            /** Stem */
+            stem: string;
+            /** Options */
+            options: string[];
+            /** Answer */
+            answer: string;
+            /** Analysis */
+            analysis: string;
+            /**
+             * Source
+             * @description textbook 改编自课本 / generated 原创
+             */
+            source: string;
+            /** Source Ref */
+            source_ref: string;
+            /**
+             * Status
+             * @description checked、disputed、unchecked 待审核 / approved 已通过 / rejected 驳回
+             */
+            status: string;
+            /** Check Result */
+            check_result: {
+                [key: string]: unknown;
+            } | null;
+            /** Warnings */
+            warnings: string[];
+            /** Edited */
+            edited: boolean;
+            /** Knowledge Points */
+            knowledge_points: string[];
+            /** Reviewed At */
+            reviewed_at: string | null;
+        };
+        /** ProgressIn */
+        ProgressIn: {
+            /**
+             * Book Id
+             * Format: uuid
+             */
+            book_id: string;
+            /**
+             * Section Ids
+             * @description 这周教的节
+             */
+            section_ids: string[];
+            /**
+             * Enabled
+             * @description 关掉后不再发周测
+             * @default true
+             */
+            enabled: boolean;
+        };
+        /** ProgressOut */
+        ProgressOut: {
+            /** Subject */
+            subject: string;
+            /**
+             * Book Id
+             * Format: uuid
+             */
+            book_id: string;
+            /** Book Title */
+            book_title: string;
+            /** Section Ids */
+            section_ids: string[];
+            /** Section Labels */
+            section_labels: string[];
+            /** Enabled */
+            enabled: boolean;
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /**
+             * Up To Date
+             * @description 这周更新过进度
+             */
+            up_to_date: boolean;
         };
         /** QuestionCounts */
         QuestionCounts: {
@@ -3361,6 +4112,44 @@ export interface components {
              */
             quota: number | null;
         };
+        /** SectionBrief */
+        SectionBrief: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** No */
+            no: string;
+            /** Title */
+            title: string;
+            /**
+             * Kp Count
+             * @default 0
+             */
+            kp_count: number;
+        };
+        /** SectionOut */
+        SectionOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** No */
+            no: string;
+            /** Title */
+            title: string;
+            /** Chapter No */
+            chapter_no: string;
+            /** Chapter Title */
+            chapter_title: string;
+            /**
+             * Approved Count
+             * @description 这一节审核通过、可以进卷的题数
+             */
+            approved_count: number;
+        };
         /** SelfCheckIn */
         SelfCheckIn: {
             /** Correct */
@@ -3477,6 +4266,11 @@ export interface components {
             /** Phone */
             phone: string;
         };
+        /** StatusIn */
+        StatusIn: {
+            /** Published */
+            published: boolean;
+        };
         /** StatusOut */
         StatusOut: {
             /** Blocked By */
@@ -3489,6 +4283,11 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Kind
+             * @description normal 老师布置的作业 / weekly 周测
+             */
+            kind: string;
             /** Title */
             title: string;
             /** Subject */
@@ -3556,6 +4355,11 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Kind
+             * @description normal 老师布置的作业 / weekly 周测
+             */
+            kind: string;
             /** Title */
             title: string;
             /** Subject */
@@ -3610,6 +4414,80 @@ export interface components {
             username: string;
             /** Password */
             password: string;
+        };
+        /** StudentWeekRow */
+        StudentWeekRow: {
+            /**
+             * Student Id
+             * Format: uuid
+             */
+            student_id: string;
+            /** Student Name */
+            student_name: string;
+            /** Username */
+            username: string | null;
+            /**
+             * Assignment Id
+             * @description 这周没发卷时为空
+             */
+            assignment_id: string | null;
+            /** Level */
+            level: number | null;
+            /** Level Label */
+            level_label: string | null;
+            /** Reason */
+            reason: string;
+            /**
+             * Status
+             * @description todo 未提交 / submitted 待批改 / graded 已批改
+             */
+            status: string | null;
+            /** Score */
+            score: number | null;
+            /** Total Score */
+            total_score: number | null;
+            /**
+             * Percent
+             * @description 得分率，百分制；含 AI 给的还没确认的分
+             */
+            percent: number | null;
+            /** Pending Count */
+            pending_count: number;
+            /** Prev Percent */
+            prev_percent: number | null;
+            /**
+             * Weak Kps
+             * @description 掌握度最低的几个知识点
+             */
+            weak_kps: components["schemas"]["KpMastery"][];
+        };
+        /** SubjectWeekly */
+        SubjectWeekly: {
+            /** Subject */
+            subject: string;
+            /** Book Title */
+            book_title: string;
+            /** Level */
+            level: number;
+            /** Level Label */
+            level_label: string;
+            /**
+             * Weeks
+             * @description 新的在前
+             */
+            weeks: components["schemas"]["WeekRow"][];
+            /** Weak Kps */
+            weak_kps: components["schemas"]["KpMastery"][];
+            /**
+             * Tested Kps
+             * @description 考过的知识点数
+             */
+            tested_kps: number;
+            /**
+             * Mastered Kps
+             * @description 掌握度达到 0.8 的知识点数
+             */
+            mastered_kps: number;
         };
         /**
          * SubmissionDetail
@@ -3912,6 +4790,72 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /** WeekRow */
+        WeekRow: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Title */
+            title: string;
+            /** Status */
+            status: string;
+            /** Score */
+            score: number | null;
+            /** Total Score */
+            total_score: number;
+            /**
+             * Percent
+             * @description 得分率，百分制；只算已经出分的题
+             */
+            percent: number | null;
+            /** Level */
+            level: number;
+            /** Level Label */
+            level_label: string;
+            /** Reason */
+            reason: string;
+            /**
+             * Origins
+             * @description 各来源的题数：this_week / weak / wrong / review
+             */
+            origins: {
+                [key: string]: number;
+            };
+        };
+        /** WeekStat */
+        WeekStat: {
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+            /**
+             * Issued
+             * @description 这周发了几份
+             */
+            issued: number;
+            /** Submitted */
+            submitted: number;
+            /** Graded */
+            graded: number;
+            /**
+             * Pending Review
+             * @description 等老师确认的题数
+             */
+            pending_review: number;
+            /**
+             * Avg Percent
+             * @description 已提交的平均得分率，百分制
+             */
+            avg_percent: number | null;
+        };
         /** WrongBook */
         WrongBook: {
             /** Items */
@@ -3961,6 +4905,24 @@ export interface components {
             guide: {
                 [key: string]: unknown;
             } | null;
+        };
+        /** CountOut */
+        app__modules__assignment__router__CountOut: {
+            /**
+             * Count
+             * @description 处理了几条
+             */
+            count: number;
+        };
+        /** CountOut */
+        app__modules__curriculum__router__CountOut: {
+            /** Count */
+            count: number;
+        };
+        /** CountOut */
+        app__modules__weekly__router__CountOut: {
+            /** Count */
+            count: number;
         };
     };
     responses: never;
@@ -6027,7 +6989,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CountOut"];
+                    "application/json": components["schemas"]["app__modules__assignment__router__CountOut"];
                 };
             };
             /** @description Validation Error */
@@ -6089,7 +7051,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CountOut"];
+                    "application/json": components["schemas"]["app__modules__assignment__router__CountOut"];
                 };
             };
             /** @description Validation Error */
@@ -7394,6 +8356,563 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_api_courses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Catalog"];
+                };
+            };
+        };
+    };
+    chapter_api_courses_chapters__chapter_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChapterDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_file_api_courses_files__file_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_pool_question_api_courses_questions__qid__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PoolQuestionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PoolQuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_pool_question_api_courses_questions__qid__approve_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PoolQuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reject_pool_question_api_courses_questions__qid__reject_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                qid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PoolQuestionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    pool_questions_api_courses__book_id__questions_get: {
+        parameters: {
+            query?: {
+                /** @description pending 待审核 / approved / rejected / 具体状态 */
+                status?: string | null;
+                section_id?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PoolPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_checked_api_courses__book_id__questions_approve_checked_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveCheckedIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__curriculum__router__CountOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    book_api_courses__book_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_status_api_courses__book_id__status_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookBrief"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_classes_api_teacher_weekly_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassWeeklyOut"][];
+                };
+            };
+        };
+    };
+    sections_api_teacher_weekly_books__book_id__sections_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                book_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SectionOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_progress_api_teacher_weekly_classes__klass_id__progress_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                klass_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProgressIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassWeeklyOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    issue_api_teacher_weekly_classes__klass_id__issue_post: {
+        parameters: {
+            query: {
+                subject: string;
+            };
+            header?: never;
+            path: {
+                klass_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IssueResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_api_teacher_weekly_classes__klass_id__report_get: {
+        parameters: {
+            query: {
+                subject: string;
+                /** @description 这一周的周一；为空表示最近一周 */
+                week?: string | null;
+            };
+            header?: never;
+            path: {
+                klass_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClassWeekReport"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    grading_api_teacher_weekly_classes__klass_id__grading_get: {
+        parameters: {
+            query: {
+                subject: string;
+            };
+            header?: never;
+            path: {
+                klass_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradingRow"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_all_api_teacher_weekly_classes__klass_id__confirm_all_post: {
+        parameters: {
+            query: {
+                subject: string;
+            };
+            header?: never;
+            path: {
+                klass_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__weekly__router__CountOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_weekly_api_student_weekly_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubjectWeekly"][];
                 };
             };
         };

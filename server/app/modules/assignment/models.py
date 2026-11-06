@@ -21,6 +21,11 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.core.db import Base, TimestampMixin, new_id
 
 
+class AssignmentKind(StrEnum):
+    NORMAL = "normal"  # 老师布置的作业
+    WEEKLY = "weekly"  # 系统按周组的个人周测（见 modules/weekly），一份只发给一个学生
+
+
 class ItemType(StrEnum):
     QUESTION = "question"  # 练习题
     DOCUMENT = "document"  # 阅读讲义
@@ -55,6 +60,7 @@ class Assignment(TimestampMixin, Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
     tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenant.id"), index=True)
     owner_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id", ondelete="CASCADE"))
+    kind: Mapped[str] = mapped_column(String(10), default=AssignmentKind.NORMAL, server_default="normal")
     title: Mapped[str] = mapped_column(String(200))
     subject: Mapped[str] = mapped_column(String(20))
     note: Mapped[str] = mapped_column(Text, default="")  # 给学生的要求
@@ -74,6 +80,7 @@ class AssignmentItem(TimestampMixin, Base):
     """作业里的一项。content 是布置时的快照：之后题库、讲义再改，已布置的作业不变。
 
     - question：{qtype, stem, options, answer, analysis, knowledge_points, difficulty}
+      周测的题还带 kp_ids（知识点 ID）、origin（本周内容 / 薄弱点 / 错题同类题 / 复习）、section_no
     - document：{title, markdown}
     - recite：{title, cards: [{kind, front, back}]}
     """

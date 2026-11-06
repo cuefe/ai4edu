@@ -1,6 +1,6 @@
-import { BookOutlined, CreditCardOutlined, MessageOutlined, RightOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
-import { Card, Col, ConfigProvider, Empty, Row, Space, Statistic, Tag, Typography } from "antd";
+import { AppstoreOutlined, BookOutlined, CameraOutlined, CreditCardOutlined, RightOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { App, Card, Col, ConfigProvider, Empty, Row, Space, Statistic, Tag, Typography } from "antd";
 import dayjs from "dayjs";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router";
@@ -36,6 +36,7 @@ export function AssignmentRow({ a, onClick }: { a: Schemas["StudentAssignmentBri
     <div className="task-row" onClick={onClick}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <Space wrap>
+          {a.kind === "weekly" && <Tag color="purple">周测</Tag>}
           <Typography.Text strong>{a.title}</Typography.Text>
           {dueTag(a)}
           {a.score != null && <Tag color="green">{a.score} / {a.total_score} 分</Tag>}
@@ -62,6 +63,12 @@ function Entry({ icon, title, value, suffix, onClick }: { icon: ReactNode; title
 export function StudentHome() {
   const { me } = useAuth();
   const navigate = useNavigate();
+  const { message } = App.useApp();
+  const photoAsk = useMutation({
+    mutationFn: async () => unwrap(await api.POST("/api/student/tutor/sessions", { body: { mode: "learn" } })),
+    onSuccess: (s) => navigate(`/student/tutor/${s.id}?camera=1`),
+    onError: (e) => message.error(e.message),
+  });
   const assignments = useQuery({ queryKey: ["student", "assignments"], queryFn: async () => unwrap(await api.GET("/api/student/assignments")) });
   const review = useQuery({ queryKey: ["student", "review"], queryFn: async () => unwrap(await api.GET("/api/student/review/today", { params: { query: {} } })) });
   const wrong = useQuery({ queryKey: ["student", "wrong"], queryFn: async () => unwrap(await api.GET("/api/student/wrong-items", { params: { query: {} } })) });
@@ -87,14 +94,17 @@ export function StudentHome() {
           </Space>
         </div>
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={8}>
+          <Col xs={12} lg={6}>
+            <Entry icon={<AppstoreOutlined />} title="课程" value="科目与课件" onClick={() => navigate("/student/courses")} />
+          </Col>
+          <Col xs={12} lg={6}>
+            <Entry icon={<CameraOutlined />} title="拍题" value="拍照问 AI" onClick={() => photoAsk.mutate()} />
+          </Col>
+          <Col xs={12} lg={6}>
             <Entry icon={<CreditCardOutlined />} title="今日背诵" value={cards} suffix="张卡片" onClick={() => navigate("/student/review")} />
           </Col>
-          <Col xs={24} sm={8}>
+          <Col xs={12} lg={6}>
             <Entry icon={<BookOutlined />} title="错题待订正" value={wrong.data?.pending ?? 0} suffix="道" onClick={() => navigate("/student/wrong")} />
-          </Col>
-          <Col xs={24} sm={8}>
-            <Entry icon={<MessageOutlined />} title="问一问" value="有问题就问" onClick={() => navigate("/student/tutor")} />
           </Col>
         </Row>
         <Card title="今日任务" loading={assignments.isLoading} extra={<a onClick={() => navigate("/student/assignments")}>全部作业</a>}>

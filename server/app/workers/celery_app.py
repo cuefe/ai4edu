@@ -7,6 +7,7 @@ REDIS_URL=memory:// 时任务在当前进程里同步执行，本地开发不需
 """
 
 from celery import Celery
+from celery.schedules import crontab
 
 import app.models  # noqa: F401  Worker 进程不经过 app.main，要在这里注册全部表
 from app.core.config import get_settings
@@ -23,6 +24,7 @@ celery_app = Celery(
         "app.modules.library.tasks",
         "app.modules.qbank.tasks",
         "app.modules.assignment.tasks",
+        "app.modules.weekly.tasks",
     ],
 )
 celery_app.conf.update(
@@ -34,5 +36,15 @@ celery_app.conf.update(
     task_serializer="json",
     result_serializer="json",
     accept_content=["json"],
-    beat_schedule={},  # 定时任务（复习推送、周报）后续在这里登记
+    # 定时任务要单独起一个 beat 进程（见 deploy/docker-compose.yml），全局只能有一个
+    beat_schedule={
+        "weekly-remind-progress": {
+            "task": "weekly.remind_progress",
+            "schedule": crontab(hour=18, minute=0, day_of_week=4),
+        },
+        "weekly-issue": {
+            "task": "weekly.issue_all",
+            "schedule": crontab(hour=16, minute=0, day_of_week=5),
+        },
+    },
 )

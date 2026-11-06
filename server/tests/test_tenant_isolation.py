@@ -88,9 +88,11 @@ def test_app_role_is_not_superuser(owner_conn):
         "chat_message",
         "chat_session",
         "class_member",
+        "class_progress",
         "crisis_alert",
         "document",
         "klass",
+        "kp_evidence",
         "moderation_log",
         "notification",
         "question",
@@ -104,5 +106,6 @@ def test_app_role_is_not_superuser(owner_conn):
         "review_state",
         "submission",
         "user_account",
+        "weekly_paper",
         "wrong_item",
     ]

@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -41,6 +41,28 @@ class WrongItem(TimestampMixin, Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class KpEvidence(TimestampMixin, Base):
+    """一道题对一个知识点的得分记录，掌握度由它算出来（见 learning/service.py 的 mastery）。
+
+    按“学生 + 作业里的题 + 知识点”存一条：老师改分时覆盖，不会重复计入。
+    """
+
+    __tablename__ = "kp_evidence"
+    __table_args__ = (
+        UniqueConstraint("student_id", "item_id", "kp_id"),
+        Index("ix_kp_evidence_student", "tenant_id", "student_id", "subject"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("tenant.id"), index=True)
+    student_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("user_account.id", ondelete="CASCADE"))
+    subject: Mapped[str] = mapped_column(String(20))
+    kp_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("knowledge_point.id", ondelete="CASCADE"), index=True)
+    item_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("assignment_item.id", ondelete="CASCADE"))
+    ratio: Mapped[float] = mapped_column(Float)  # 得分比例，0～1
+    answered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class ReviewState(TimestampMixin, Base):

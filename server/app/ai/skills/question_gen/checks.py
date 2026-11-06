@@ -13,6 +13,8 @@ from app.ai.skills.question_gen.schema import CHOICE_TYPES, QuestionData
 LETTERS = "ABCDEF"
 _OPTION_PREFIX = re.compile(r"^\s*[（(]?[A-Fa-f][)）]?\s*[.．、:：)）]\s*")
 _BLANK = re.compile(r"_{3,}|＿{2,}|[（(]\s{2,}[)）]")
+_BLANK_RUN = re.compile(r"(_{3,}|＿{2,})")
+_INLINE_MATH = re.compile(r"(?<!\$)\$(?!\$)([^$]+?)\$(?!\$)")
 TRUE_WORDS = {"对", "正确", "√", "✓", "T", "TRUE", "是"}
 FALSE_WORDS = {"错", "错误", "×", "✗", "F", "FALSE", "否"}
 
@@ -33,6 +35,24 @@ def truth_value(text: str) -> bool | None:
     if s in FALSE_WORDS:
         return False
     return None
+
+
+def blanks_out_of_math(stem: str) -> str:
+    """把写在公式里的填空横线移到公式外面：$x=＿＿＿＿$ → $x=$＿＿＿＿。公式里的全角横线显示不正常。"""
+
+    def fix(match: re.Match[str]) -> str:
+        pieces = _BLANK_RUN.split(match.group(1))
+        if len(pieces) == 1:
+            return match.group(0)
+        out = []
+        for piece in pieces:
+            if _BLANK_RUN.fullmatch(piece):
+                out.append(piece)
+            elif piece.strip():
+                out.append(f"${piece}$")
+        return "".join(out)
+
+    return _INLINE_MATH.sub(fix, stem)
 
 
 def normalize(q: QuestionData) -> tuple[QuestionData, str | None, list[str]]:
@@ -71,7 +91,7 @@ def normalize(q: QuestionData) -> tuple[QuestionData, str | None, list[str]]:
     points = [p.strip()[:30] for p in q.knowledge_points if p.strip()][:5]
     fixed = q.model_copy(
         update={
-            "stem": normalize_math(q.stem),
+            "stem": blanks_out_of_math(normalize_math(q.stem)),
             "options": options,
             "answer": answer,
             "analysis": normalize_math(q.analysis),

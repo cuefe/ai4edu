@@ -83,7 +83,7 @@ function StudentAnswer({ answer }: { answer: Answer }) {
   );
 }
 
-function GradingCard({ row, onDone }: { row: Grading; onDone: () => void }) {
+export function GradingCard({ row, onDone }: { row: Grading; onDone: () => void }) {
   const { message } = App.useApp();
   const [score, setScore] = useState<number | null>(row.ai_score);
   const [comment, setComment] = useState("");

@@ -11,6 +11,7 @@ from app.core.errors import AppError, app_error_handler
 from app.modules.assignment.router import student_router as assignment_student_router
 from app.modules.assignment.router import teacher_router as assignment_teacher_router
 from app.modules.content.router import router as content_router
+from app.modules.curriculum.router import router as curriculum_router
 from app.modules.iam.router import auth_router, me_router
 from app.modules.learning.router import router as learning_router
 from app.modules.library.router import router as library_router
@@ -21,6 +22,8 @@ from app.modules.qbank.router import router as qbank_router
 from app.modules.recite.router import router as recite_router
 from app.modules.safety.router import router as safety_router
 from app.modules.tutor.router import router as tutor_router
+from app.modules.weekly.router import student_router as weekly_student_router
+from app.modules.weekly.router import teacher_router as weekly_teacher_router
 
 DEV_DEFAULTS = {
     "jwt_secret": Settings.model_fields["jwt_secret"].default,
@@ -102,6 +105,9 @@ def create_app() -> FastAPI:
         tutor_router,
         safety_router,
         ops_router,
+        curriculum_router,
+        weekly_teacher_router,
+        weekly_student_router,
     ):
         api.include_router(router)
     app.include_router(api)

@@ -18,6 +18,7 @@ from app.modules.assignment.models import (
     AnswerStatus,
     Assignment,
     AssignmentItem,
+    AssignmentKind,
     ItemType,
     Submission,
     SubmissionStatus,
@@ -216,7 +217,11 @@ def list_for_teacher(db: Session, tenant_id: uuid.UUID, teacher_id: uuid.UUID) -
     rows = list(
         db.scalars(
             select(Assignment)
-            .where(Assignment.tenant_id == tenant_id, Assignment.owner_id == teacher_id)
+            .where(
+                Assignment.tenant_id == tenant_id,
+                Assignment.owner_id == teacher_id,
+                Assignment.kind == AssignmentKind.NORMAL,  # 周测一人一份，在“周测”页面按班级看
+            )
             .order_by(Assignment.created_at.desc())
             .limit(200)
         )
@@ -357,7 +362,18 @@ def refresh_submission(db: Session, sub: Submission) -> None:
 
 
 def record_result(db: Session, a: Assignment, sub: Submission, item: AssignmentItem, answer: Answer) -> None:
-    """一道题出了最终分：做错的进错题本，老师改成对的从错题本拿掉。"""
+    """一道题出了最终分：做错的进错题本，老师改成对的从错题本拿掉；周测的题同时计入知识点掌握度。"""
+    if answer.score is not None and item.score:
+        learning.record_evidence(
+            db,
+            tenant_id=a.tenant_id,
+            student_id=sub.student_id,
+            subject=a.subject,
+            item_id=item.id,
+            kp_ids=item.content.get("kp_ids") or [],
+            ratio=answer.score / item.score,
+            at=sub.submitted_at or now(),
+        )
     if answer.correct:
         learning.remove_wrong(db, sub.student_id, item.id)
         return
@@ -376,13 +392,17 @@ def record_result(db: Session, a: Assignment, sub: Submission, item: AssignmentI
 
 
 def grading_rows(db: Session, a: Assignment) -> list[GradingRow]:
+    return grading_rows_of(db, [a.id])
+
+
+def grading_rows_of(db: Session, assignment_ids: list[uuid.UUID]) -> list[GradingRow]:
     """等老师确认的题：AI 没把握的排前面，批改中的排最后。"""
     rows = db.execute(
         select(Answer, User.name, AssignmentItem)
         .join(Submission, Submission.id == Answer.submission_id)
         .join(User, User.id == Answer.student_id)
         .join(AssignmentItem, AssignmentItem.id == Answer.item_id)
-        .where(Submission.assignment_id == a.id, Answer.status.in_(PENDING))
+        .where(Submission.assignment_id.in_(assignment_ids), Answer.status.in_(PENDING))
         .order_by(
             case((Answer.status == AnswerStatus.GRADING, 1), else_=0),
             Answer.ai_confidence.asc().nulls_first(),

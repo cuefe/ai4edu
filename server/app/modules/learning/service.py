@@ -1,21 +1,25 @@
 """学生的学习记录：错题本（自动收录、订正）。背诵复习在 review.py。"""
 
 import uuid
+from collections.abc import Iterable
 from datetime import UTC, datetime
 from typing import Any
 
 import anyio
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.ai.gateway.gateway import CallContext, get_gateway
 from app.ai.skills import correction_guide
 from app.ai.skills.common import parse_json
-from app.core.db import session_scope
+from app.core.db import new_id, session_scope
 from app.core.errors import AppError, NotFound
 from app.modules.assignment.grading import objective_ratio
-from app.modules.learning.models import ReviewState, WrongItem, WrongStatus
+from app.modules.learning.models import KpEvidence, ReviewState, WrongItem, WrongStatus
+
+MASTERY_DECAY = 0.8  # 掌握度里成绩的权重每过一周乘这个数
 
 
 class WrongItemOut(BaseModel):
@@ -85,6 +89,75 @@ def remove_wrong(db: Session, student_id: uuid.UUID, item_id: uuid.UUID) -> None
             WrongItem.status == WrongStatus.PENDING,
         )
     )
+
+
+def record_evidence(
+    db: Session,
+    *,
+    tenant_id: uuid.UUID,
+    student_id: uuid.UUID,
+    subject: str,
+    item_id: uuid.UUID,
+    kp_ids: list[str],
+    ratio: float,
+    at: datetime,
+) -> None:
+    """记下一道题对这些知识点的得分。同一道题再记一次（老师改分）时覆盖，不会重复计入。"""
+    if not kp_ids:
+        return
+    stmt = insert(KpEvidence).values(
+        [
+            {
+                "id": new_id(),
+                "tenant_id": tenant_id,
+                "student_id": student_id,
+                "subject": subject,
+                "kp_id": uuid.UUID(k),
+                "item_id": item_id,
+                "ratio": ratio,
+                "answered_at": at,
+            }
+            for k in kp_ids
+        ]
+    )
+    db.execute(
+        stmt.on_conflict_do_update(
+            index_elements=[KpEvidence.student_id, KpEvidence.item_id, KpEvidence.kp_id],
+            set_={"ratio": stmt.excluded.ratio, "answered_at": stmt.excluded.answered_at},
+        )
+    )
+
+
+def compute_mastery(
+    rows: Iterable[tuple[uuid.UUID, float, datetime]], at: datetime
+) -> dict[uuid.UUID, float]:
+    """按知识点、按时间衰减的加权正确率（技术方案里的掌握度）。rows 是（知识点，得分比例，作答时间）。
+
+    越近的成绩权重越大，每过一周权重乘 MASTERY_DECAY。再加一个权重为 1、取值 0.5 的先验：
+    只做过一道题时不会直接判成 0 或 1，答错一道题的掌握度是 0.25，答对一道是 0.75。
+    """
+    weighted: dict[uuid.UUID, float] = {}
+    weights: dict[uuid.UUID, float] = {}
+    for kp_id, ratio, answered_at in rows:
+        weeks = max((at - answered_at).total_seconds(), 0) / (7 * 24 * 3600)
+        w = MASTERY_DECAY**weeks
+        weighted[kp_id] = weighted.get(kp_id, 0) + w * ratio
+        weights[kp_id] = weights.get(kp_id, 0) + w
+    return {k: (weighted[k] + 0.5) / (weights[k] + 1) for k in weights}
+
+
+def mastery(
+    db: Session, tenant_id: uuid.UUID, student_id: uuid.UUID, subject: str, at: datetime | None = None
+) -> dict[uuid.UUID, float]:
+    """这个学生这门课各知识点的掌握度（0～1）。没考过的知识点不在结果里。"""
+    rows = db.execute(
+        select(KpEvidence.kp_id, KpEvidence.ratio, KpEvidence.answered_at).where(
+            KpEvidence.tenant_id == tenant_id,
+            KpEvidence.student_id == student_id,
+            KpEvidence.subject == subject,
+        )
+    )
+    return compute_mastery([tuple(r) for r in rows], at or datetime.now(UTC))
 
 
 def learned_counts(db: Session, student_id: uuid.UUID, item_ids: list[uuid.UUID]) -> dict[uuid.UUID, int]:

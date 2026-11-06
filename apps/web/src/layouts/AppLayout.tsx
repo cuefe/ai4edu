@@ -1,6 +1,7 @@
 import {
   AlertOutlined,
   ApartmentOutlined,
+  AppstoreOutlined,
   AuditOutlined,
   BarChartOutlined,
   BookOutlined,
@@ -19,6 +20,7 @@ import {
   ReadOutlined,
   RobotOutlined,
   SafetyCertificateOutlined,
+  ScheduleOutlined,
   SnippetsOutlined,
   TeamOutlined,
   UserOutlined,
@@ -66,6 +68,7 @@ export function AppLayout() {
       children: [
         { key: "/ops/tenants", icon: <CloudServerOutlined />, label: "机构管理" },
         { key: "/ops/plans", icon: <GiftOutlined />, label: "套餐" },
+        { key: "/ops/courses", icon: <AppstoreOutlined />, label: "教材内容" },
         { key: "/ops/usage", icon: <BarChartOutlined />, label: "AI 用量" },
         { key: "/ops/ai", icon: <RobotOutlined />, label: "AI 模型" },
         { key: "/ops/safety", icon: <SafetyCertificateOutlined />, label: "内容安全" },
@@ -95,6 +98,7 @@ export function AppLayout() {
         children: [
           { key: "/teacher", icon: <HomeOutlined />, label: "我的班级" },
           { key: "/teacher/assignments", icon: <SnippetsOutlined />, label: "作业" },
+          { key: "/teacher/weekly", icon: <ScheduleOutlined />, label: "周测" },
           alerts,
         ],
       },
@@ -107,6 +111,7 @@ export function AppLayout() {
           { key: "/teacher/recite", icon: <CreditCardOutlined />, label: "背诵卡片" },
           { key: "/teacher/questions", icon: <BookOutlined />, label: "题库" },
           { key: "/teacher/resources", icon: <FolderOpenOutlined />, label: "资料库" },
+          { key: "/teacher/courses", icon: <AppstoreOutlined />, label: "课程" },
         ],
       },
     );
@@ -117,7 +122,9 @@ export function AppLayout() {
       label: "学习",
       children: [
         { key: "/student", icon: <ReadOutlined />, label: "首页" },
+        { key: "/student/courses", icon: <AppstoreOutlined />, label: "课程" },
         { key: "/student/assignments", icon: <SnippetsOutlined />, label: "作业" },
+        { key: "/student/weekly", icon: <ScheduleOutlined />, label: "周测" },
         { key: "/student/review", icon: <CreditCardOutlined />, label: "背诵" },
         { key: "/student/wrong", icon: <BookOutlined />, label: "错题本" },
         { key: "/student/tutor", icon: <MessageOutlined />, label: "问一问" },

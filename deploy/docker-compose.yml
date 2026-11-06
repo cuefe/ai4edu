@@ -61,6 +61,15 @@ services:
       db: { condition: service_healthy }
       redis: { condition: service_started }
 
+  # 定时任务（周四提醒更新进度、周五发周测）。全局只能有一个 beat，否则任务会重复触发
+  beat:
+    build: ../server
+    command: ["celery", "-A", "app.workers.celery_app", "beat", "-l", "info", "-s", "/tmp/celerybeat-schedule"]
+    environment: *api-env
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_started }
+
   web:
     build:
       context: ..

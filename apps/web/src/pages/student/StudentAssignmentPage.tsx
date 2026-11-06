@@ -15,6 +15,7 @@ type Item = Schemas["ItemOut"];
 type Answer = Schemas["AnswerOut"];
 
 const SAVE_DELAY = 800;
+const ORIGIN_LABELS: Record<string, string> = { this_week: "本周内容", weak: "巩固薄弱点", wrong: "错题同类题", review: "复习" };
 
 async function uploadPhoto(aid: string, itemId: string, file: File): Promise<Answer> {
   const fd = new FormData();
@@ -62,8 +63,10 @@ function QuestionCard({
   onPhotos: (a: Answer) => void;
 }) {
   const { message } = App.useApp();
-  const c = item.content as { qtype: string; stem: string; options?: string[]; answer?: string; analysis?: string };
+  const c = item.content as { qtype: string; stem: string; options?: string[]; answer?: string; analysis?: string; origin?: string };
   const editing = detail.status === "todo";
+  // 周测的题说明为什么考它；交卷后才显示，免得影响作答
+  const origin = !editing && c.origin ? ORIGIN_LABELS[c.origin] : undefined;
   const photos = answer?.image_count ?? 0;
   const removePhoto = useMutation({
     mutationFn: async (index: number) =>
@@ -81,6 +84,7 @@ function QuestionCard({
         <Typography.Text strong>{item.seq + 1}.</Typography.Text>
         <Tag>{c.qtype}</Tag>
         <Tag>{item.score} 分</Tag>
+        {origin && <Tag color="purple">{origin}</Tag>}
         {!editing && <ResultLine answer={answer} item={item} revealed={detail.revealed} />}
       </Space>
       <MarkdownView text={c.stem} />
@@ -229,7 +233,7 @@ export function StudentAssignmentPage() {
   const confirmSubmit = () => {
     const empty = questions.filter((q) => !(values[q.id] ?? "").trim() && !answers.get(q.id)?.image_count).length;
     modal.confirm({
-      title: "提交作业？",
+      title: d.kind === "weekly" ? "交卷？" : "提交作业？",
       content: empty ? `还有 ${empty} 道题没有作答，提交后不能再修改。` : "提交后不能再修改。",
       okText: "提交",
       onOk: () => submit.mutateAsync(),
@@ -246,6 +250,7 @@ export function StudentAssignmentPage() {
               {d.title}
             </Typography.Title>
             <Space wrap>
+              {d.kind === "weekly" && <Tag color="purple">周测</Tag>}
               <Typography.Text type="secondary">
                 {d.subject} · {teacherLabel(d.teacher_name)}
               </Typography.Text>
@@ -259,7 +264,7 @@ export function StudentAssignmentPage() {
           </Typography.Title>
         )}
       </div>
-      {d.note && <Alert type="info" showIcon title={`老师说：${d.note}`} style={{ marginBottom: 16 }} />}
+      {d.note && <Alert type="info" showIcon title={d.kind === "weekly" ? d.note : `老师说：${d.note}`} style={{ marginBottom: 16 }} />}
       {d.status === "submitted" && <Alert type="warning" showIcon title={`有 ${d.pending_count} 道题老师还在批改，批改完会显示总分`} style={{ marginBottom: 16 }} />}
       {d.items.length === 0 && <Empty />}
       {d.items.map((item) => {
@@ -306,7 +311,7 @@ export function StudentAssignmentPage() {
       })}
       {d.status === "todo" && questions.length > 0 && (
         <Button type="primary" size="large" block icon={<SendOutlined />} loading={submit.isPending} onClick={confirmSubmit}>
-          提交作业
+          {d.kind === "weekly" ? "交卷" : "提交作业"}
         </Button>
       )}
       <Drawer title="问 AI" open={Boolean(askSession)} onClose={() => setAskSession(null)} size="large" destroyOnHidden>
