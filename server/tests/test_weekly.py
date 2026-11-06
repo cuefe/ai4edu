@@ -873,6 +873,52 @@ def test_pool_import_keeps_reviewed_and_removes_stale():
     assert rows["乙＿＿＿＿"].status == "rejected"  # 驳回的不会复活
 
 
+def test_auto_approve_only_passes_questions_that_checked_out(client):
+    make_platform_admin()
+    admin = auth(client, "13900000000")
+    book = _make_book(per_type=(0, 0, 0))
+    questions = [
+        _question(stem="一致＿＿＿＿"),
+        _question(stem="有分歧＿＿＿＿", status="disputed"),
+        _question(stem="没校验＿＿＿＿", status="unchecked"),
+    ]
+    with session_scope(bypass=True) as db:
+        pack = pool.PoolPack(book_key="rj-math-9a", questions=questions)
+        assert pool.import_pool(db, pack, auto_approve=True).auto_approved == 1
+        rows = {q.stem: q for q in db.scalars(select(PoolQuestion).where(PoolQuestion.book_id == book))}
+    assert rows["一致＿＿＿＿"].status == "approved"
+    assert rows["一致＿＿＿＿"].reviewed_by is None and rows["一致＿＿＿＿"].reviewed_at is not None
+    assert rows["有分歧＿＿＿＿"].status == "disputed"
+    assert rows["没校验＿＿＿＿"].status == "unchecked"
+
+    # 页面上能分清自动通过和人工通过
+    url = f"/api/courses/{book}/questions"
+    [auto] = client.get(url, headers=admin, params={"status": "approved"}).json()["items"]
+    assert auto["auto_approved"] is True
+    pending = client.get(url, headers=admin, params={"status": "pending"}).json()["items"]
+    client.post(f"/api/courses/questions/{pending[0]['id']}/approve", headers=admin)
+    approved = client.get(url, headers=admin, params={"status": "approved"}).json()["items"]
+    assert sorted(q["auto_approved"] for q in approved) == [False, True]
+
+    # 不要求自动通过时，校验一致的题也留给人工审
+    with session_scope(bypass=True) as db:
+        fresh = pool.PoolPack(book_key="rj-math-9a", questions=[_question(stem="新题＿＿＿＿")])
+        assert pool.import_pool(db, fresh).auto_approved == 0
+        status = db.scalar(select(PoolQuestion.status).where(PoolQuestion.stem == "新题＿＿＿＿"))
+    assert status == "checked"
+
+
+def test_reimport_with_auto_approve_keeps_rejected_questions():
+    book = _make_book(per_type=(0, 0, 0))
+    _import([_question(stem="甲＿＿＿＿")])
+    with session_scope(bypass=True) as db:
+        db.scalar(select(PoolQuestion).where(PoolQuestion.book_id == book)).status = "rejected"
+        pack = pool.PoolPack(book_key="rj-math-9a", questions=[_question(stem="甲＿＿＿＿")])
+        result = pool.import_pool(db, pack, auto_approve=True)
+        status = db.scalar(select(PoolQuestion.status).where(PoolQuestion.book_id == book))
+    assert (result.kept, result.auto_approved, status) == (1, 0, "rejected")  # 驳回的题不会被自动放回去
+
+
 def test_pool_import_drops_questions_it_cannot_link():
     _make_book(per_type=(0, 0, 0))
     result = _import(

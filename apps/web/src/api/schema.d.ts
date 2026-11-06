@@ -3635,6 +3635,11 @@ export interface components {
             knowledge_points: string[];
             /** Reviewed At */
             reviewed_at: string | null;
+            /**
+             * Auto Approved
+             * @description 校验一致后自动通过，没有人工审过
+             */
+            auto_approved: boolean;
         };
         /** ProgressIn */
         ProgressIn: {

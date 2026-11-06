@@ -15,7 +15,7 @@ content-import PACK    导入内容包（--publish 同时发布）
 content-publish KEY    发布一册教材（--off 下架）
 content-remove KEY     删除一册教材，连同上传的文件
 pool-gen DIR           按课本原文离线生成周测题库并校验答案（app/devtools/pool_gen.py）
-pool-import FILE       导入题包，审核通过后才会进周测
+pool-import FILE       导入题包：校验一致的题自动通过，其余的要人工看（--review 全部留给人工审）
 weekly-run             马上跑一次周测发卷（平时由定时任务在周五下午跑）
 """
 
@@ -224,14 +224,15 @@ def pool_import(args: argparse.Namespace) -> None:
     from app.modules.curriculum import pool
 
     with session_scope(bypass=True) as db:
-        result = pool.import_pool(db, pool.load_pack(Path(args.questions)))
+        result = pool.import_pool(db, pool.load_pack(Path(args.questions)), auto_approve=not args.review)
     print(
         f"导入完成：新增 {result.created} 道，更新 {result.updated} 道，"
-        f"审核过或改过的 {result.kept} 道没有动，删除 {result.removed} 道"
+        f"审核过或改过的 {result.kept} 道没有动，删除 {result.removed} 道，"
+        f"校验一致自动通过 {result.auto_approved} 道"
     )
     for reason in result.dropped:
         print(f"  没有导入：{reason}")
-    print("题目要在「平台运营 → 教材内容 → 题库」审核通过后才会进周测")
+    print("没有通过的题不会进周测，要在「平台运营 → 教材内容 → 题库」逐题看")
 
 
 def weekly_run(args: argparse.Namespace) -> None:
@@ -325,6 +326,7 @@ def main() -> None:
     p.set_defaults(func=pool_gen)
     p = sub.add_parser("pool-import")
     p.add_argument("questions", help="pool-gen 生成的 questions.json")
+    p.add_argument("--review", action="store_true", help="校验一致的题也不自动通过，全部留给人工审")
     p.set_defaults(func=pool_import)
     p = sub.add_parser("weekly-run")
     p.add_argument("--remind", action="store_true", help="只提醒老师更新进度，不发卷")

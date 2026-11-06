@@ -140,7 +140,7 @@ function QuestionCard({ q, onEdit, onChanged }: { q: Question; onEdit: () => voi
             {k}
           </Tag>
         ))}
-        {meta && <Tag color={meta.color}>{meta.label}</Tag>}
+        {meta && <Tag color={meta.color}>{q.auto_approved ? "自动通过" : meta.label}</Tag>}
         {q.source === "textbook" ? <Tag color="cyan">{q.source_ref || "改编自课本"}</Tag> : <Tag>原创</Tag>}
         {q.edited && <Tag color="purple">人工改过</Tag>}
       </Space>
@@ -231,7 +231,7 @@ export function PoolQuestionsPage() {
         type="info"
         showIcon
         style={{ marginBottom: 16 }}
-        title="只有审核通过的题才会进周测。“校验一致”只说明两次独立解答的答案相同，不代表题目本身没问题，给真实学生用之前请学科老师抽查。"
+        title="只有已通过的题才会进周测。校验一致的题导入时自动通过；有分歧、没校验的题要在这里逐题看。发现错题可以驳回，之后不会再进卷，已经发出去的卷子不受影响。"
       />
       <Space wrap style={{ marginBottom: 16 }}>
         <Segmented

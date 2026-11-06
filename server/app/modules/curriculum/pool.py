@@ -1,4 +1,7 @@
-"""平台题库：离线生成的题包导入、运营审核。只有审核通过（approved）的题才会进周测。
+"""平台题库：离线生成的题包导入、运营审核。只有通过（approved）的题才会进周测。
+
+自动校验一致的题，导入时可以直接通过（auto_approve），这时 reviewed_by 为空，能和人工审过的题区分开。
+有分歧、没能校验的题一定要人工看。
 
 - 按 key（节编号 + 题干的摘要）更新，可以重复导入。
 - 审核过或人工改过的题，重新导入时不动；还没审核、这次题包里又没有的题会删掉。
@@ -77,6 +80,7 @@ class PoolQuestionOut(BaseModel):
     edited: bool
     knowledge_points: list[str]
     reviewed_at: datetime | None
+    auto_approved: bool = Field(description="校验一致后自动通过，没有人工审过")
 
 
 class PoolPage(BaseModel):
@@ -105,6 +109,7 @@ class PoolImportResult:
     created: int = 0
     updated: int = 0
     kept: int = 0  # 审核过或改过，没有动
+    auto_approved: int = 0  # 这次校验一致、自动通过的题数
     removed: int = 0
     dropped: list[str] = field(default_factory=list)  # 没能导入的题和原因
 
@@ -113,7 +118,8 @@ def load_pack(path: Path) -> PoolPack:
     return PoolPack.model_validate_json(path.read_text(encoding="utf-8"))
 
 
-def import_pool(db: Session, pack: PoolPack) -> PoolImportResult:
+def import_pool(db: Session, pack: PoolPack, *, auto_approve: bool = False) -> PoolImportResult:
+    """auto_approve：校验一致的题直接通过，不用人工审。"""
     book = db.scalar(select(Textbook).where(Textbook.key == pack.book_key))
     if book is None:
         raise NotFound(f"教材 {pack.book_key} 不存在，先导入内容包")
@@ -163,6 +169,9 @@ def import_pool(db: Session, pack: PoolPack) -> PoolImportResult:
         row.stem, row.options, row.answer, row.analysis = item.stem, item.options, item.answer, item.analysis
         row.source, row.source_ref = item.source, item.source_ref
         row.status, row.check_result, row.warnings = item.status, item.check_result, item.warnings
+        if auto_approve and item.status == PoolStatus.CHECKED:
+            row.status, row.reviewed_by, row.reviewed_at = PoolStatus.APPROVED, None, datetime.now(UTC)
+            result.auto_approved += 1
         db.flush()
         db.execute(delete(PoolQuestionKp).where(PoolQuestionKp.question_id == row.id))
         db.add_all(PoolQuestionKp(question_id=row.id, kp_id=kid) for kid in dict.fromkeys(kp_ids))
@@ -210,6 +219,7 @@ def _to_out(db: Session, rows: list[PoolQuestion]) -> list[PoolQuestionOut]:
             edited=q.edited,
             knowledge_points=names.get(q.id, []),
             reviewed_at=q.reviewed_at,
+            auto_approved=q.status == PoolStatus.APPROVED and q.reviewed_by is None,
         )
         for q in rows
     ]
